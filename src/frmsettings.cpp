@@ -24,7 +24,7 @@ frmSettings::frmSettings(QWidget *parent) :
     foreach (QGroupBox *box, this->findChildren<QGroupBox*>()) {
         ui->listCategories->addItem(box->title());
         ui->listCategories->item(ui->listCategories->count() - 1)->setData(Qt::UserRole, box->objectName());
-    }
+    }    
 
     ui->listCategories->item(0)->setSelected(true);
     connect(ui->scrollSettings->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(onScrollBarValueChanged(int)));
@@ -64,6 +64,10 @@ int frmSettings::exec()
     {
         m_storedColors.append(pick->color());
     }
+
+    ui->cmdRefresh->setIcon(QIcon(":/images/reset.png"));
+    QColor buttonTextColor = palette().color(QPalette::ButtonText);
+    Util::changeButtonIconColor(ui->cmdRefresh, buttonTextColor);
 
     return QDialog::exec();
 }
@@ -674,12 +678,6 @@ void frmSettings::on_cmdDefaults_clicked()
     setPanelSpindle(true);   
 
     ui->clpTool->setColor(QColor(255, 153, 0));
-
-    ui->clpVisualizerBackground->setColor(QColor(255, 255, 255));
-    ui->clpVisualizerText->setColor(QColor(0, 0, 0));
-
-    ui->clpToolpathNormal->setColor(QColor(0, 0, 0));
-    ui->clpToolpathDrawn->setColor(QColor(217, 217, 217));
     ui->clpToolpathHighlight->setColor(QColor(145, 130, 230));
     ui->clpToolpathZMovement->setColor(QColor(255, 0, 0));
     ui->clpToolpathStart->setColor(QColor(255, 0, 0));

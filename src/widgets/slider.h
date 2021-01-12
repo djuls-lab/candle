@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QSlider>
 #include <QPaintEvent>
+#include <QMouseEvent>
 #include <QPainter>
 #include <QDebug>
 
@@ -18,10 +19,13 @@ public:
 
 protected:
     void paintEvent(QPaintEvent *ev);
+    void mousePressEvent(QMouseEvent *ev);
+    void mouseMoveEvent(QMouseEvent *ev);
+    void mouseReleaseEvent(QMouseEvent *ev);
 
 private:
     int m_currentValue;
-
+    bool m_isDragging;
 };
 
 #endif // SLIDER_H

@@ -86,9 +86,157 @@ int main(int argc, char *argv[])
                     QMenuBar::item:pressed {border: 1px solid #505050; border-bottom: 1px; border-top-left-radius: 3px; border-top-right-radius: 3px; background: #404040; color: white;}\
                     QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white;}\
                     QDialog {border: 1px solid palette(mid);}");
-#endif
 
-    a.setStyleSheet(a.styleSheet() + "QWidget {font-size: 8pt}");
+#endif    
+
+    a.setStyle(QStyleFactory::create("Fusion"));
+    // a.setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
+//    a.setStyleSheet(a.styleSheet() + R"(
+//    #cmdHome { qproperty-icon: url(:/images/home.png); }
+//    #cmdTouch { qproperty-icon: url(:/images/touch.png); }
+//    #cmdZeroXY { qproperty-icon: url(:/images/zeroXY.png); }
+//    #cmdZeroZ { qproperty-icon: url(:/images/zeroZ.png); }
+//    #cmdRestoreOrigin { qproperty-icon: url(:/images/restoreOrigin.png); }
+//    #cmdSafePosition { qproperty-icon: url(:/images/safePosition.png); }
+//    #cmdReset { qproperty-icon: url(:/images/reset.png); }
+//    #cmdUnlock { qproperty-icon: url(:/images/unlock.png); }
+//    #cmdXMinus { qproperty-icon: url(:/images/xMinus.png); }
+//    #cmdYPlus { qproperty-icon: url(:/images/yPlus.png); }
+//    #cmdYMinus { qproperty-icon: url(:/images/yMinus.png); }
+//    #cmdStop { qproperty-icon: url(:/images/stop.png); }
+//    #cmdXPlus { qproperty-icon: url(:/images/xPlus.png); }
+//    #cmdZPlus { qproperty-icon: url(:/images/zPlus.png); }
+//    #cmdZMinus { qproperty-icon: url(:/images/zMinus.png); }
+//    #cmdUser0 { qproperty-icon: url(:/images/user0.png); }
+//    #cmdUser1 { qproperty-icon: url(:/images/user1.png); }
+//    #cmdUser2 { qproperty-icon: url(:/images/user2.png); }
+//    #cmdUser3 { qproperty-icon: url(:/images/user3.png); }
+//    #cmdSpindle { qproperty-icon: url(:/images/spindle.png); }
+//    #cmdCommandSend { qproperty-icon: url(:/images/commandSend.png); }
+//    #cmdClearConsole { qproperty-icon: url(:/images/clearConsole.png); }
+
+//    #cmdRefresh { qproperty-icon: url(:/images/reset.png); }
+//    )");
+//      a.setStyleSheet(a.styleSheet() + R"(
+//        #cboCommand QComboBox {
+//            padding-top: 3;
+//            padding-bottom: 3;
+//            padding-right: 8;
+//        }
+
+//        #cboCommand QComboBox::drop-down {
+//            border: none;
+//            width: 0px;
+//        }
+
+//        #cboCommand QComboBox::down-arrow {
+//            image: none;
+//            border: none;
+//            width: 0px;
+//        }
+//      )");
+
+    // a.setStyleSheet(a.styleSheet() + "#splitPanels QSplitter::handle { background-image: url(:/images/handle_small.png); }");
+
+//    a.setStyleSheet(a.styleSheet() + R"(
+//    /*QWidget {
+//        font-size: 9pt;
+//    }*/
+
+//    QSpinBox, QDoubleSpinBox {
+//        padding-top: 1px;
+//        padding-bottom: 1px;
+//    }
+
+//    QGroupBox {
+//    }
+
+//    QGroupBox:disabled {
+//        color: palette(shadow);
+//    }
+
+//    QGroupBox[overrided="true"] {
+//        color: red;
+//    }
+
+//    QGroupBox[overrided="false"] {
+//        color: palette(windowtext);
+//    }
+
+//    QGroupBox[checkable="true"]::title {
+//        margin-top: 1px;
+//    }
+
+//    QGroupBox[checkable="true"]::indicator {
+//        padding: 0 -2 -0 2;
+//        width: 13;
+//        height: 13;
+//    }
+
+//    QGroupBox[checkable="true"]::indicator:checked {
+//        image: url(:/images/collapse.png);
+//    }
+
+//    QGroupBox[checkable="true"]::indicator:unchecked {
+//        image: url(:/images/expand.png);
+//    }
+
+//    QFrame#frameManualControlXY,#frameManualControlZ {
+//        border: 1px solid lightgray;
+//        border-radius: 4px;
+//    }
+
+//    QSplitter::handle {
+//        background-repeat: no-repeat;
+//        background-position: center center;
+//    }
+
+//    QSplitter::handle:vertical {
+//        background-image: url(":/images/handle_horizontal.png");
+//    }
+//    /*
+//    QSplitter::handle:horizontal {
+//        background-image: url(":/images/handle_vertical.png");
+//    }
+//    */
+//    QTableView {
+//        selection-background-color: #cdcdff;
+//        selection-color: rgb(0, 0, 0);
+//    }
+
+//    QSlider::horizontal {
+//        padding-top: 1px;
+//        padding-bottom: 1px;
+//    }
+
+//    QSlider::groove:horizontal {
+//        border: 1px solid #999999;
+//        height: 2px;
+//        background: #8f8f91;
+//        margin: 2px 0;
+//    }
+
+//    QSlider::handle:horizontal {
+//        background-image: url(:/images/handle2s.png);
+//        border: 0px;
+//        width: 16px;
+//        margin: -7px 0;
+//    }
+
+//    QSlider::handle:horizontal:hover {
+//        background-image: url(:/images/handle2sh.png);
+//    }
+
+//    /*QSlider::sub-page:horizontal {
+//        background: red;
+//        margin: 1px 0;
+//    }*/
+
+//    QWidget { font-size: 8pt; }
+
+//    QSplitter::handle { background-image: url(:/images/handle_small.png); }
+
+//    )");
 
     frmMain w;
     w.show();

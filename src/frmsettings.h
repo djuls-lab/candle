@@ -8,6 +8,7 @@
 #include <QMessageBox>
 #include <QListWidgetItem>
 #include "widgets/colorpicker.h"
+#include "utils/util.h"
 
 namespace Ui {
 class frmSettings;

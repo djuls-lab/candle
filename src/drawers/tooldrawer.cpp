@@ -47,7 +47,13 @@ bool ToolDrawer::updateData()
         vertex.position = QVector3D(x, y, m_toolPosition.z() + m_toolLength);
         m_lines.append(vertex);
 
-        // Zero Z lines
+    }
+
+    // Zero Z lines
+    for (int i = 0; i < arcs; i++) {
+        double x = m_toolPosition.x() + m_toolDiameter / 2 * cos(M_PI + (2 * M_PI / arcs) * i);
+        double y = m_toolPosition.y() + m_toolDiameter / 2 * sin(M_PI + (2 * M_PI / arcs) * i);
+
         vertex.position = QVector3D(m_toolPosition.x(), m_toolPosition.y(), 0);
         m_lines.append(vertex);
         vertex.position = QVector3D(x, y, 0);

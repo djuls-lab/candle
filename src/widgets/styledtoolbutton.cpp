@@ -48,7 +48,7 @@ void StyledToolButton::paintEvent(QPaintEvent *e)
     QPen highlightPen;
 
     if ((!this->isEnabled() && !this->isChecked()) || (!this->isDown() && !this->isChecked() && !this->isHover())) {
-        highlightPen.setColor(Qt::white);
+        highlightPen.setColor(palette().color(QPalette::Button).lighter());
     } else if (this->isDown() || this->isChecked()) {
         highlightPen.setColor(m_highlightColor);
     } else if (this->isHover()) {
@@ -60,9 +60,12 @@ void StyledToolButton::paintEvent(QPaintEvent *e)
     painter.drawRoundedRect(1, 1, this->width() - 2, this->height() - 2, borderRadius - 1, borderRadius - 1);
 
     // Border
-    QPen pen(this->isEnabled() ? palette().color(QPalette::Shadow) : palette().color(QPalette::Mid));
+//    QPen pen(this->isEnabled() ? palette().color(QPalette::Shadow) : palette().color(QPalette::Mid));
 
-    if ((this->isDown() || this->isChecked()) && this->isEnabled()) pen.setColor(Qt::black);
+//    if ((this->isDown() || this->isChecked()) && this->isEnabled()) pen.setColor(Qt::black);
+    QPen pen(this->isEnabled() ? palette().color(QPalette::ButtonText) : palette().color(QPalette::Disabled, QPalette::ButtonText));
+
+    if ((this->isDown() || this->isChecked()) && this->isEnabled()) pen.setColor(palette().color(QPalette::HighlightedText));
 
     pen.setWidth(2);
     pen.setCapStyle(Qt::SquareCap);
@@ -82,15 +85,25 @@ void StyledToolButton::paintEvent(QPaintEvent *e)
 
     // Background border
     QLinearGradient backGradient(width() / 2, height() / 2, width() / 2, height());
-    backGradient.setColorAt(0, this->isEnabled() ? m_backColor : palette().color(QPalette::Button));
-    backGradient.setColorAt(1, this->isEnabled() ? m_backColor.darker(130) : palette().color(QPalette::Button).darker(130));
+//    backGradient.setColorAt(0, this->isEnabled() ? m_backColor : palette().color(QPalette::Button));
+//    backGradient.setColorAt(1, this->isEnabled() ? m_backColor.darker(130) : palette().color(QPalette::Button).darker(130));
+
+    if (palette().color(QPalette::Button).valueF() < 0.5) {
+        backGradient.setColorAt(0, this->isEnabled() ? palette().color(QPalette::Button).lighter(170) : palette().color(QPalette::Disabled, QPalette::Button).lighter(170));
+        backGradient.setColorAt(1, this->isEnabled() ? palette().color(QPalette::Button) : palette().color(QPalette::Disabled, QPalette::Button));
+    }else {
+        backGradient.setColorAt(0, this->isEnabled() ? palette().color(QPalette::Button) : palette().color(QPalette::Disabled, QPalette::Button));
+        backGradient.setColorAt(1, this->isEnabled() ? palette().color(QPalette::Button).darker(130) : palette().color(QPalette::Disabled, QPalette::Button).darker(130));
+    }
+
     QBrush backBrush(backGradient);
     painter.setBrush(backBrush);
     painter.setPen(Qt::NoPen);
     painter.drawRoundedRect(borderWidth - 1, borderWidth - 1, width() - borderWidth * 2 + 2, height() - borderWidth * 2 + 2, 2, 2);
 
     // Background
-    painter.setBrush(this->isEnabled() ? m_backColor : palette().color(QPalette::Button));
+//    painter.setBrush(this->isEnabled() ? m_backColor : palette().color(QPalette::Button));
+    painter.setBrush(this->isEnabled() ? palette().color(QPalette::Button) : palette().color(QPalette::Disabled, QPalette::Button));
     painter.setPen(Qt::NoPen);
     painter.drawRect(borderWidth, borderWidth, width() - borderWidth * 2, height() - borderWidth * 2);
 
@@ -114,6 +127,7 @@ void StyledToolButton::paintEvent(QPaintEvent *e)
         painter.drawText(innerRect, Qt::AlignCenter, this->text());
     }
 }
+
 QColor StyledToolButton::highlightColor() const
 {
     return m_highlightColor;

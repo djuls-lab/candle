@@ -11,6 +11,7 @@
 #include <QVector3D>
 #include <QEventLoop>
 #include <QTimer>
+#include <QPainter>
 
 class Util
 {
@@ -52,9 +53,52 @@ public:
         return QIcon(QPixmap::fromImage(img));
     }
 
+    static QIcon changeIconColor(QIcon icon, QColor color)
+    {
+//        QColor rgb;
+//        QImage img = icon.pixmap(icon.actualSize(QSize(64, 64))).toImage().convertToFormat(QImage::Format_ARGB32);
+//        for (int j=0; j<img.height();++j) {
+//            for (int i=0; i<img.width();++i) {
+////                 QColor rgb = img -> pixelColor(i, j);
+////                 img -> setPixelColor(i, j, QColor(color.red(), color.green(), color.blue(), rgb.alpha()));
+//                rgb = color;
+////                QRgb rgb = color.rgba();
+//                rgb.setAlpha(QColor(img.pixel(i, j)).alpha());
+//                img.setPixel(i, j, rgb.rgba());
+//            }
+//        }
+
+//        QRgb base_color; // desired image color
+
+        QPixmap new_image = icon.pixmap(icon.actualSize(QSize(64, 64))); //.convertToFormat(QImage::Format_ARGB32);
+        QPainter painter(&new_image);
+        painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
+        painter.fillRect(new_image.rect(), color);
+        painter.end();
+
+//        return QIcon(QPixmap::fromImage(img));
+        return QIcon(new_image);
+    }
+
     static void invertButtonIconColors(QAbstractButton *button)
     {
         button->setIcon(invertIconColors(button->icon()));
+    }
+
+    static void changeButtonIconColor(QAbstractButton *button, QColor color)
+    {
+        button->setIcon(changeIconColor(button->icon(), color));
+    }
+
+    static QString toCamelCase(const QString& s)
+    {
+        QString tmp = s;
+        QStringList parts = tmp.split(' ', QString::SkipEmptyParts);
+        for (int i = 0; i < parts.size(); ++i)
+            parts[i].replace(0, 1, parts[i][0].toUpper());
+        tmp = parts.join(" ");
+        tmp[0] = tmp[0].toLower();
+        return tmp;
     }
 };
 

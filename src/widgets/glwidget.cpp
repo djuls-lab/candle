@@ -13,6 +13,7 @@
 #endif
 
 #define ZOOMSTEP 1.1
+#define GL_PROGRAM_POINT_SIZE 100
 
 #ifdef GLES
 GLWidget::GLWidget(QWidget *parent) : QOpenGLWidget(parent), m_shaderProgram(0)

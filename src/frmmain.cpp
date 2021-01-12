@@ -32,6 +32,7 @@
 #include <QAction>
 #include <QLayout>
 #include <QMimeData>
+#include <QStyleFactory>
 #include "frmmain.h"
 #include "ui_frmmain.h"
 
@@ -88,8 +89,10 @@ frmMain::frmMain(QWidget *parent) :
     m_settingsFileName = qApp->applicationDirPath() + "/settings.ini";
     preloadSettings();
 
-    m_settings = new frmSettings(this);
-    ui->setupUi(this);
+    m_settings = new frmSettings(this);    
+
+    ui->setupUi(this);    
+
 
 #ifdef WINDOWS
     if (QSysInfo::windowsVersion() >= QSysInfo::WV_WINDOWS7) {
@@ -98,9 +101,9 @@ frmMain::frmMain(QWidget *parent) :
     }
 #endif
 
-#ifndef UNIX
-    ui->cboCommand->setStyleSheet("QComboBox {padding: 2;} QComboBox::drop-down {width: 0; border-style: none;} QComboBox::down-arrow {image: url(noimg);	border-width: 0;}");
-#endif
+//#ifndef UNIX
+//    ui->cboCommand->setStyleSheet("QComboBox {padding: 2;} QComboBox::drop-down {width: 0; border-style: none;} QComboBox::down-arrow {image: url(noimg);	border-width: 0;}");
+//#endif
 //    ui->scrollArea->updateMinimumWidth();
 
     m_heightMapMode = false;
@@ -211,6 +214,8 @@ frmMain::frmMain(QWidget *parent) :
     ui->glwVisualizer->addDrawable(&m_selectionDrawer);
     ui->glwVisualizer->fitDrawable();
 
+    applyTheme();
+
     connect(ui->glwVisualizer, SIGNAL(rotationChanged()), this, SLOT(onVisualizatorRotationChanged()));
     connect(ui->glwVisualizer, SIGNAL(resized()), this, SLOT(placeVisualizerButtons()));
     connect(&m_programModel, SIGNAL(dataChanged(QModelIndex,QModelIndex)), this, SLOT(onTableCellChanged(QModelIndex,QModelIndex)));
@@ -234,6 +239,9 @@ frmMain::frmMain(QWidget *parent) :
 
     // Loading settings
     loadSettings();
+
+//    updateMode();
+
     ui->tblProgram->hideColumn(4);
     ui->tblProgram->hideColumn(5);
     updateControlsState();
@@ -267,6 +275,19 @@ frmMain::frmMain(QWidget *parent) :
 
     connect(&m_serialPort, SIGNAL(readyRead()), this, SLOT(onSerialPortReadyRead()), Qt::QueuedConnection);
     connect(&m_serialPort, SIGNAL(error(QSerialPort::SerialPortError)), this, SLOT(onSerialPortError(QSerialPort::SerialPortError)));
+
+
+
+
+    // Setup gamepad
+    connect(&m_gamepad,SIGNAL(stateChanged()),this,SLOT(on_GamepadStateChanged()));
+    connect(&m_gamepad,SIGNAL(zeroState()),this,SLOT(on_GamepadZeroState()));
+
+
+
+
+
+
 
     this->installEventFilter(this);
     ui->tblProgram->installEventFilter(this);
@@ -318,6 +339,8 @@ void frmMain::preloadSettings()
     QSettings set(m_settingsFileName, QSettings::IniFormat);
     set.setIniCodec("UTF-8");
 
+    m_currentThemeIndex = set.value("themeIndex", 0).toInt();
+
     qApp->setStyleSheet(QString(qApp->styleSheet()).replace(QRegExp("font-size:\\s*\\d+"), "font-size: " + set.value("fontSize", "8").toString()));
 
     // Update v-sync in glformat
@@ -333,13 +356,22 @@ void frmMain::loadSettings()
 
     m_settingsLoading = true;
 
+//    m_mode = set.value("themeIndex", 0).toInt();
+
+    QMap<QString, QString> defaultColors;
+    defaultColors["toolpathZMovement"] = "#ff0000";
+    defaultColors["toolpathStart"] = "#ff0000";
+    defaultColors["toolpathHighlight"] = "#9182e6";
+    defaultColors["toolpathEnd"] = "#00ff00";
+    defaultColors["tool"] = "#ff9900";
+
     m_settings->setFontSize(set.value("fontSize", 8).toInt());
     m_settings->setPort(set.value("port").toString());
-    m_settings->setBaud(set.value("baud").toInt());
+    m_settings->setBaud(set.value("baud", 115200).toInt());
     m_settings->setIgnoreErrors(set.value("ignoreErrors", false).toBool());
     m_settings->setAutoLine(set.value("autoLine", true).toBool());
     m_settings->setToolDiameter(set.value("toolDiameter", 3).toDouble());
-    m_settings->setToolLength(set.value("toolLength", 15).toDouble());
+    m_settings->setToolLength(set.value("toolLength", 20).toDouble());
     m_settings->setAntialiasing(set.value("antialiasing", true).toBool());
     m_settings->setMsaa(set.value("msaa", true).toBool());
     m_settings->setVsync(set.value("vsync", false).toBool());
@@ -361,13 +393,13 @@ void frmMain::loadSettings()
     m_settings->setSpindleSpeedMax(set.value("spindleSpeedMax", 100).toInt());
     m_settings->setLaserPowerMin(set.value("laserPowerMin", 0).toInt());
     m_settings->setLaserPowerMax(set.value("laserPowerMax", 100).toInt());
-    m_settings->setRapidSpeed(set.value("rapidSpeed", 0).toInt());
+    m_settings->setRapidSpeed(set.value("rapidSpeed", 2500).toInt());
     m_settings->setHeightmapProbingFeed(set.value("heightmapProbingFeed", 0).toInt());
-    m_settings->setAcceleration(set.value("acceleration", 10).toInt());
-    m_settings->setToolAngle(set.value("toolAngle", 0).toDouble());
-    m_settings->setToolType(set.value("toolType", 0).toInt());
+    m_settings->setAcceleration(set.value("acceleration", 100).toInt());
+    m_settings->setToolAngle(set.value("toolAngle", 15).toDouble());
+    m_settings->setToolType(set.value("toolType", 1).toInt());
     m_settings->setFps(set.value("fps", 60).toInt());
-    m_settings->setQueryStateTime(set.value("queryStateTime", 250).toInt());
+    m_settings->setQueryStateTime(set.value("queryStateTime", 40).toInt());
 
     m_settings->setPanelUserCommands(set.value("panelUserCommandsVisible", true).toBool());
     m_settings->setPanelHeightmap(set.value("panelHeightmapVisible", true).toBool());
@@ -432,9 +464,9 @@ void frmMain::loadSettings()
     }
 
     ui->cboJogStep->setItems(set.value("jogSteps").toStringList());
-    ui->cboJogStep->setCurrentIndex(ui->cboJogStep->findText(set.value("jogStep").toString()));
+    ui->cboJogStep->setCurrentIndex(ui->cboJogStep->findText(set.value("jogStep", ui->cboJogStep->itemText(0)).toString()));
     ui->cboJogFeed->setItems(set.value("jogFeeds").toStringList());
-    ui->cboJogFeed->setCurrentIndex(ui->cboJogFeed->findText(set.value("jogFeed").toString()));
+    ui->cboJogFeed->setCurrentIndex(ui->cboJogFeed->findText(set.value("jogFeed", 1000).toString()));
 
     ui->txtHeightMapBorderX->setValue(set.value("heightmapBorderX", 0).toDouble());
     ui->txtHeightMapBorderY->setValue(set.value("heightmapBorderY", 0).toDouble());
@@ -451,10 +483,13 @@ void frmMain::loadSettings()
     ui->txtHeightMapInterpolationStepX->setValue(set.value("heightmapInterpolationStepX", 1).toDouble());
     ui->txtHeightMapInterpolationStepY->setValue(set.value("heightmapInterpolationStepY", 1).toDouble());
     ui->cboHeightMapInterpolationType->setCurrentIndex(set.value("heightmapInterpolationType", 0).toInt());
-    ui->chkHeightMapInterpolationShow->setChecked(set.value("heightmapInterpolationShow", false).toBool());
+    ui->chkHeightMapInterpolationShow->setChecked(set.value("heightmapInterpolationShow", false).toBool());    
 
     foreach (ColorPicker* pick, m_settings->colors()) {
-        pick->setColor(QColor(set.value(pick->objectName().mid(3), "black").toString()));
+        QString name = Util::toCamelCase(pick->objectName().mid(3));
+//        qDebug() << "colorPicker objectName:" << name;
+
+        pick->setColor(QColor(set.value(name, defaultColors.contains(name) ? defaultColors[name] : "black"  ).toString()));
     }
 
     updateRecentFilesMenu();
@@ -468,9 +503,9 @@ void frmMain::loadSettings()
 
     // Restore panels state
     ui->grpUserCommands->setChecked(set.value("userCommandsPanel", true).toBool());
-    ui->grpHeightMap->setChecked(set.value("heightmapPanel", true).toBool());
-    ui->grpSpindle->setChecked(set.value("spindlePanel", true).toBool());
-    ui->grpOverriding->setChecked(set.value("feedPanel", true).toBool());
+    ui->grpHeightMap->setChecked(set.value("heightmapPanel", false).toBool());
+    ui->grpSpindle->setChecked(set.value("spindlePanel", false).toBool());
+    ui->grpOverriding->setChecked(set.value("feedPanel", false).toBool());
     ui->grpJog->setChecked(set.value("jogPanel", true).toBool());
 
     // Restore last commands list
@@ -484,6 +519,8 @@ void frmMain::saveSettings()
 {
     QSettings set(m_settingsFileName, QSettings::IniFormat);
     set.setIniCodec("UTF-8");
+
+    set.setValue("themeIndex", m_currentThemeIndex);
 
     set.setValue("port", m_settings->port());
     set.setValue("baud", m_settings->baud());
@@ -585,7 +622,8 @@ void frmMain::saveSettings()
     set.setValue("heightmapInterpolationShow", ui->chkHeightMapInterpolationShow->isChecked());
 
     foreach (ColorPicker* pick, m_settings->colors()) {
-        set.setValue(pick->objectName().mid(3), pick->color().name());
+        QString name = Util::toCamelCase(pick->objectName().mid(3));
+        set.setValue(name, pick->color().name());
     }
 
     QStringList list;
@@ -629,7 +667,8 @@ void frmMain::updateControlsState() {
     ui->widgetUserCommands->setEnabled(portOpened && !m_processingFile);
     ui->widgetSpindle->setEnabled(portOpened);
     ui->widgetJog->setEnabled(portOpened && !m_processingFile);
-//    ui->grpConsole->setEnabled(portOpened);
+    ui->grpConsole->setEnabled(portOpened);
+    ui->widgetFeed->setEnabled(portOpened);
     ui->cboCommand->setEnabled(portOpened && (!ui->chkKeyboardControl->isChecked()));
     ui->cmdCommandSend->setEnabled(portOpened);
 //    ui->widgetFeed->setEnabled(!m_transferringFile);
@@ -1778,6 +1817,9 @@ void frmMain::loadFile(QString fileName)
     // Set filename
     m_programFileName = fileName;
 
+
+
+
     // Prepare text stream
     QTextStream textStream(&file);
 
@@ -2203,8 +2245,6 @@ void frmMain::applySettings() {
     ui->glwVisualizer->setZBuffer(m_settings->zBuffer());
     ui->glwVisualizer->setVsync(m_settings->vsync());
     ui->glwVisualizer->setFps(m_settings->fps());
-    ui->glwVisualizer->setColorBackground(m_settings->colors("VisualizerBackground"));
-    ui->glwVisualizer->setColorText(m_settings->colors("VisualizerText"));
 
     ui->slbSpindle->setMinimum(m_settings->spindleSpeedMin());
     ui->slbSpindle->setMaximum(m_settings->spindleSpeedMax());
@@ -2222,8 +2262,6 @@ void frmMain::applySettings() {
 
     m_codeDrawer->setSimplify(m_settings->simplify());
     m_codeDrawer->setSimplifyPrecision(m_settings->simplifyPrecision());
-    m_codeDrawer->setColorNormal(m_settings->colors("ToolpathNormal"));
-    m_codeDrawer->setColorDrawn(m_settings->colors("ToolpathDrawn"));
     m_codeDrawer->setColorHighlight(m_settings->colors("ToolpathHighlight"));
     m_codeDrawer->setColorZMovement(m_settings->colors("ToolpathZMovement"));
     m_codeDrawer->setColorStart(m_settings->colors("ToolpathStart"));
@@ -2238,37 +2276,6 @@ void frmMain::applySettings() {
 
     m_selectionDrawer.setColor(m_settings->colors("ToolpathHighlight"));
 
-    // Adapt visualizer buttons colors
-    const int LIGHTBOUND = 127;
-    const int NORMALSHIFT = 40;
-    const int HIGHLIGHTSHIFT = 80;
-
-    QColor base = m_settings->colors("VisualizerBackground");
-    bool light = base.value() > LIGHTBOUND;
-    QColor normal, highlight;
-
-    normal.setHsv(base.hue(), base.saturation(), base.value() + (light ? -NORMALSHIFT : NORMALSHIFT));
-    highlight.setHsv(base.hue(), base.saturation(), base.value() + (light ? -HIGHLIGHTSHIFT : HIGHLIGHTSHIFT));
-
-    ui->glwVisualizer->setStyleSheet(QString("QToolButton {border: 1px solid %1; \
-                background-color: %3} QToolButton:hover {border: 1px solid %2;}")
-                .arg(normal.name()).arg(highlight.name())
-                .arg(base.name()));
-
-    ui->cmdFit->setIcon(QIcon(":/images/fit_1.png"));
-    ui->cmdIsometric->setIcon(QIcon(":/images/cube.png"));
-    ui->cmdFront->setIcon(QIcon(":/images/cubeFront.png"));
-    ui->cmdLeft->setIcon(QIcon(":/images/cubeLeft.png"));
-    ui->cmdTop->setIcon(QIcon(":/images/cubeTop.png"));
-
-    if (!light) {
-        Util::invertButtonIconColors(ui->cmdFit);
-        Util::invertButtonIconColors(ui->cmdIsometric);
-        Util::invertButtonIconColors(ui->cmdFront);
-        Util::invertButtonIconColors(ui->cmdLeft);
-        Util::invertButtonIconColors(ui->cmdTop);
-    }
-
     ui->cboCommand->setMinimumHeight(ui->cboCommand->height());
     ui->cmdClearConsole->setFixedHeight(ui->cboCommand->height());
     ui->cmdCommandSend->setFixedHeight(ui->cboCommand->height());
@@ -2277,6 +2284,181 @@ void frmMain::applySettings() {
         button->setToolTip(m_settings->userCommands(button->objectName().right(1).toInt()));
         button->setEnabled(!button->toolTip().isEmpty());
     }
+}
+
+void frmMain::applyTheme()
+{
+    ui->cmdHome->setIcon(QIcon(":/images/home.png"));
+    ui->cmdTouch->setIcon(QIcon(":/images/touch.png"));
+    ui->cmdZeroXY->setIcon(QIcon(":/images/zeroXY.png"));
+    ui->cmdZeroZ->setIcon(QIcon(":/images/zeroZ.png"));
+    ui->cmdRestoreOrigin->setIcon(QIcon(":/images/restoreOrigin.png"));
+    ui->cmdSafePosition->setIcon(QIcon(":/images/safePosition.png"));
+    ui->cmdReset->setIcon(QIcon(":/images/reset.png"));
+    ui->cmdUnlock->setIcon(QIcon(":/images/unlock.png"));
+    ui->cmdXMinus->setIcon(QIcon(":/images/xMinus.png"));
+    ui->cmdYPlus->setIcon(QIcon(":/images/yPlus.png"));
+    ui->cmdYMinus->setIcon(QIcon(":/images/yMinus.png"));
+    ui->cmdStop->setIcon(QIcon(":/images/stop.png"));
+    ui->cmdXPlus->setIcon(QIcon(":/images/xPlus.png"));
+    ui->cmdZPlus->setIcon(QIcon(":/images/zPlus.png"));
+    ui->cmdZMinus->setIcon(QIcon(":/images/zMinus.png"));
+    ui->cmdUser0->setIcon(QIcon(":/images/user0.png"));
+    ui->cmdUser1->setIcon(QIcon(":/images/user1.png"));
+    ui->cmdUser2->setIcon(QIcon(":/images/user2.png"));
+    ui->cmdUser3->setIcon(QIcon(":/images/user3.png"));
+    ui->cmdSpindle->setIcon(QIcon(":/images/spindle.png"));
+    ui->cmdCommandSend->setIcon(QIcon(":/images/commandSend.png"));
+    ui->cmdClearConsole->setIcon(QIcon(":/images/clearConsole.png"));
+
+    ui->cmdFit->setIcon(QIcon(":/images/fit.png"));
+    ui->cmdIsometric->setIcon(QIcon(":/images/cube.png"));
+    ui->cmdFront->setIcon(QIcon(":/images/cubeFront.png"));
+    ui->cmdLeft->setIcon(QIcon(":/images/cubeLeft.png"));
+    ui->cmdTop->setIcon(QIcon(":/images/cubeTop.png"));
+
+    QColor backgroundColor, textColor, pathNormalColor, pathDrawnColor;
+
+    if (m_currentThemeIndex==1) {
+        // Dark Mode
+        QPalette darkPalette;
+        darkPalette.setColor(QPalette::Window, QColor(53, 53, 53));
+        darkPalette.setColor(QPalette::WindowText, Qt::white);
+        darkPalette.setColor(QPalette::Disabled, QPalette::WindowText, QColor(127, 127, 127));
+        darkPalette.setColor(QPalette::Base, QColor(42, 42, 42));
+        darkPalette.setColor(QPalette::AlternateBase, QColor(66, 66, 66));
+        darkPalette.setColor(QPalette::ToolTipBase, Qt::white);
+        darkPalette.setColor(QPalette::ToolTipText, QColor(53, 53, 53));
+        darkPalette.setColor(QPalette::Text, Qt::white);
+        darkPalette.setColor(QPalette::Disabled, QPalette::Text, QColor(127, 127, 127));
+        darkPalette.setColor(QPalette::Dark, QColor(35, 35, 35));
+        darkPalette.setColor(QPalette::Shadow, QColor(20, 20, 20));
+        darkPalette.setColor(QPalette::Button, QColor(53, 53, 53));
+//        darkPalette.setColor(QPalette::ButtonText, QColor(196, 196, 196));
+        darkPalette.setColor(QPalette::ButtonText, QColor(225, 225, 225));
+        darkPalette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor(127, 127, 127));
+        darkPalette.setColor(QPalette::BrightText, Qt::red);
+        darkPalette.setColor(QPalette::Link, QColor(42, 130, 218));
+        darkPalette.setColor(QPalette::Highlight, QColor(42, 130, 218));
+        darkPalette.setColor(QPalette::Disabled, QPalette::Highlight, QColor(80, 80, 80));
+        darkPalette.setColor(QPalette::HighlightedText, Qt::white);
+        darkPalette.setColor(QPalette::Disabled, QPalette::HighlightedText, QColor(127, 127, 127));
+
+        qApp->setPalette(darkPalette);
+
+        backgroundColor = darkPalette.color(QPalette::Background).darker();
+        textColor = darkPalette.color(QPalette::Foreground).darker();
+        pathNormalColor = darkPalette.color(QPalette::Foreground).darker();
+        pathDrawnColor = darkPalette.color(QPalette::Foreground);
+
+        QColor buttonTextColor = palette().color(QPalette::ButtonText);
+
+        Util::changeButtonIconColor(ui->cmdHome, buttonTextColor);
+        Util::changeButtonIconColor(ui->cmdTouch, buttonTextColor);
+        Util::changeButtonIconColor(ui->cmdZeroXY, buttonTextColor);
+        Util::changeButtonIconColor(ui->cmdZeroZ, buttonTextColor);
+        Util::changeButtonIconColor(ui->cmdRestoreOrigin, buttonTextColor);
+        Util::changeButtonIconColor(ui->cmdSafePosition, buttonTextColor);
+        Util::changeButtonIconColor(ui->cmdReset, buttonTextColor);
+        Util::changeButtonIconColor(ui->cmdUnlock, buttonTextColor);
+        Util::changeButtonIconColor(ui->cmdXMinus, buttonTextColor);
+        Util::changeButtonIconColor(ui->cmdYPlus, buttonTextColor);
+        Util::changeButtonIconColor(ui->cmdYMinus, buttonTextColor);
+        Util::changeButtonIconColor(ui->cmdStop, buttonTextColor);
+        Util::changeButtonIconColor(ui->cmdXPlus, buttonTextColor);
+        Util::changeButtonIconColor(ui->cmdZPlus, buttonTextColor);
+        Util::changeButtonIconColor(ui->cmdZMinus, buttonTextColor);
+        Util::changeButtonIconColor(ui->cmdUser0, buttonTextColor);
+        Util::changeButtonIconColor(ui->cmdUser1, buttonTextColor);
+        Util::changeButtonIconColor(ui->cmdUser2, buttonTextColor);
+        Util::changeButtonIconColor(ui->cmdUser3, buttonTextColor);
+        Util::changeButtonIconColor(ui->cmdSpindle, buttonTextColor);
+        Util::changeButtonIconColor(ui->cmdCommandSend, buttonTextColor);
+        Util::changeButtonIconColor(ui->cmdClearConsole, buttonTextColor);
+
+        Util::invertButtonIconColors(ui->cmdFit);
+        Util::invertButtonIconColors(ui->cmdIsometric);
+        Util::invertButtonIconColors(ui->cmdFront);
+        Util::invertButtonIconColors(ui->cmdLeft);
+        Util::invertButtonIconColors(ui->cmdTop);
+
+        foreach (QGroupBox* groupBox, this->findChildren<QGroupBox*>()) {
+            groupBox->setStyleSheet(R"(
+                QGroupBox[checkable="true"]::indicator:checked {
+                    image: url(:/images/collapse_invert.png);
+                }
+
+                QGroupBox[checkable="true"]::indicator:unchecked {
+                    image: url(:/images/expand_invert.png);
+                }
+            )");
+        }
+    }
+    else if (m_currentThemeIndex==0) {
+        m_previous_palette.setColor(QPalette::Disabled, QPalette::WindowText, QColor(127, 127, 127));
+        m_previous_palette.setColor(QPalette::Disabled, QPalette::Text, QColor(127, 127, 127));
+        m_previous_palette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor(127, 127, 127));
+        m_previous_palette.setColor(QPalette::Disabled, QPalette::Highlight, QColor(196, 196, 196));
+        m_previous_palette.setColor(QPalette::Disabled, QPalette::HighlightedText, QColor(127, 127, 127));
+
+        qApp->setPalette(m_previous_palette);
+
+        backgroundColor = m_previous_palette.color(QPalette::Background).lighter();
+        textColor = m_previous_palette.color(QPalette::Foreground).lighter();
+        pathNormalColor = m_previous_palette.color(QPalette::Background).darker();
+        pathDrawnColor = m_previous_palette.color(QPalette::Foreground);
+
+        foreach (QGroupBox* groupBox, this->findChildren<QGroupBox*>()) {
+            groupBox->setStyleSheet(R"(
+                QGroupBox[checkable="true"]::indicator:checked {
+                    image: url(:/images/collapse.png);
+                }
+
+                QGroupBox[checkable="true"]::indicator:unchecked {
+                    image: url(:/images/expand.png);
+                }
+            )");
+        }
+    }
+
+    ui->glwVisualizer->setColorBackground(backgroundColor);
+    ui->glwVisualizer->setColorText(textColor);
+    m_codeDrawer->setColorNormal(pathNormalColor);
+    m_codeDrawer->setColorDrawn(pathDrawnColor);
+    m_codeDrawer->update();
+
+    QColor sliderHandleHoverColor, sliderHandleBorderHoverColor, sliderHandleDisabledColor, sliderHandleBorderDisabledColor;
+
+    sliderHandleHoverColor = QColor(128, 128, 128);
+    sliderHandleBorderHoverColor = QColor(48, 48, 48);
+    sliderHandleDisabledColor = Qt::gray;
+    sliderHandleBorderDisabledColor = Qt::darkGray;
+    if (m_currentThemeIndex == 1) {
+        sliderHandleHoverColor = QColor(196, 196, 196);
+        sliderHandleBorderHoverColor = QColor(235, 235, 235);
+        sliderHandleDisabledColor = Qt::darkGray;
+        sliderHandleBorderDisabledColor = Qt::gray;
+    }
+
+    qApp->setStyleSheet(QString(" \
+        QWidget { font-size: 9pt; } \
+        QHeaderView::section {height: 22px; background-color: palette(base); border: none; border-right: 1px solid rgba(128, 128, 128, 64); } \
+        QScrollArea { border-top: 2px solid transparent; border-bottom: 2px solid transparent; } \
+        QScrollBar:vertical { border: none; width: 2px; padding-top: 8px; } \
+        QScrollBar::handle:vertical { background: darkgray; } \
+        QScrollBar::add-line:vertical { border: none; background: none; height: 0px; } \
+        QScrollBar::sub-line:vertical { border: none; background: none; height: 0px; } \
+        #grpConsole QComboBox { padding: 0px; padding-left: 3px; } \
+        #grpConsole QComboBox::drop-down { border: none; width:0px; } \
+        #grpConsole QComboBox::down-arrow { border: none; image: none; width:0px; } \
+        #glwVisualizer QToolButton { border: 1px solid palette(button-text); background-color: %1; } \
+        #glwVisualizer QToolButton:hover { border: 1px solid palette(highlight); } \
+        QSlider::handle { background-color: palette(button); width: 10px; height: 10px; margin: 2px; border-radius: 7px; border: 2px solid  palette(button-text); } \
+        QSlider::handle:hover { background-color: %2; border-color: %3;} \
+        QSlider::handle:disabled { background-color: %4; border-color: %5; } \
+        #tblProgram QScrollBar::handle:vertical { min-width: 8px; min-height: 24px; } \
+    ").arg(backgroundColor.name()).arg(sliderHandleHoverColor.name()).arg(sliderHandleBorderHoverColor.name())
+      .arg(sliderHandleDisabledColor.name()).arg(sliderHandleBorderDisabledColor.name()));
 }
 
 void frmMain::updateParser()
@@ -3976,4 +4158,108 @@ void frmMain::on_cmdStop_clicked()
 {
     m_queue.clear();
     m_serialPort.write(QByteArray(1, char(0x85)));
+}
+
+void frmMain::on_actLight_triggered()
+{
+    m_currentThemeIndex = 0;
+    applyTheme();
+}
+
+void frmMain::on_actDark_triggered()
+{
+    m_currentThemeIndex = 1;
+    applyTheme();
+}
+
+// Jog on gamepad control
+void frmMain::on_GamepadStateChanged()
+{
+    if (!m_processingFile) {
+        m_jogVector = QVector3D(m_gamepad.x, m_gamepad.y, m_gamepad.r);
+
+        if (m_gamepad.z < -0.9) {
+            ui->cboJogFeed->setCurrentPrevious();
+        }
+
+        if (m_gamepad.z > 0.9) {
+            ui->cboJogFeed->setCurrentNext();
+        }
+
+        jogStep();
+
+        // Select button pressed
+        if (m_gamepad.button == 256) {
+            emit ui->cmdZeroXY->clicked();
+            emit ui->cmdZeroZ->clicked();
+        }
+
+        // Start button pressed
+        if (m_gamepad.button == 512) {
+            emit ui->cmdFileSend->clicked();
+        }
+
+        // Button 1 pressed
+        if (m_gamepad.button == 1) {
+            emit ui->cmdUser0->clicked(true);
+        }
+
+        // Button 2 pressed
+        if (m_gamepad.button == 2) {
+            emit ui->cmdUser1->clicked(true);
+        }
+
+        // Button 3 pressed
+        if (m_gamepad.button == 4) {
+            emit ui->cmdUser2->clicked(true);
+        }
+
+        // Button 4 pressed
+        if (m_gamepad.button == 8) {
+            emit ui->cmdUser3->clicked(true);
+        }
+
+        // Button l1 pressed
+        if (m_gamepad.button == 16) {
+            emit ui->cmdReset->clicked(true);
+        }
+
+        // Button r1 pressed
+        if (m_gamepad.button == 32) {
+            emit ui->cmdUnlock->clicked(true);
+        }
+
+        // Button l2 pressed
+        if (m_gamepad.button == 64) {
+            emit ui->cmdHome->clicked(true);
+        }
+
+        // Button r2 pressed
+        if (m_gamepad.button == 128) {
+            emit ui->cmdHome->clicked(true);
+        }
+
+    }else {
+        // Select button pressed
+        if (m_gamepad.button == 256) {
+            emit ui->cmdFileAbort->clicked();
+            m_processingFile = false;
+            emit ui->cmdFileReset->clicked();
+        }
+
+        // Start button pressed
+        if (m_gamepad.button == 512) {
+            emit ui->cmdFilePause->clicked(!ui->cmdFilePause->isChecked());
+        }
+
+    }
+}
+
+void frmMain::on_GamepadZeroState()
+{
+    if (!m_processingFile) {
+        m_queue.clear();
+        m_jogVector = QVector3D(0, 0, 0);
+        jogStep();
+    }
 }

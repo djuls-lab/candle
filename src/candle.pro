@@ -66,7 +66,8 @@ SOURCES += main.cpp\
     widgets/slider.cpp \
     widgets/sliderbox.cpp \
     drawers/selectiondrawer.cpp \
-    widgets/comboboxkey.cpp
+    widgets/comboboxkey.cpp \
+    utils/gamepad.cpp
 
 HEADERS  += frmmain.h \
     frmsettings.h \
@@ -98,7 +99,8 @@ HEADERS  += frmmain.h \
     widgets/slider.h \
     widgets/sliderbox.h \
     drawers/selectiondrawer.h \
-    widgets/comboboxkey.h
+    widgets/comboboxkey.h \
+    utils/gamepad.h
 
 FORMS    += frmmain.ui \
     frmsettings.ui \

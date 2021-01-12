@@ -20,100 +20,6 @@
    <iconset resource="images.qrc">
     <normaloff>:/images/candle_256.png</normaloff>:/images/candle_256.png</iconset>
   </property>
-  <property name="styleSheet">
-   <string notr="true">/*QWidget {
-	font-size: 9pt;
-}*/
-
-QSpinBox, QDoubleSpinBox {
-	padding-top: 1px;
-	padding-bottom: 1px;
-}
-
-QGroupBox {
-}
-
-QGroupBox:disabled {
-	color: palette(shadow);
-}
-
-QGroupBox[overrided=&quot;true&quot;] {
-	color: red;
-}
-
-QGroupBox[overrided=&quot;false&quot;] {
-	color: palette(windowtext);
-}
-
-QGroupBox[checkable=&quot;true&quot;]::title {
-	margin-top: 1px;
-}
-
-QGroupBox[checkable=&quot;true&quot;]::indicator {
-	padding: 0 -2 -0 2;
-	width: 13;
-	height: 13;
-}
-
-QGroupBox[checkable=&quot;true&quot;]::indicator:checked {	
-	image: url(:/images/collapse.png);
-}
-
-QGroupBox[checkable=&quot;true&quot;]::indicator:unchecked {	
-	image: url(:/images/expand.png);
-}
-
-QFrame#frameManualControlXY,#frameManualControlZ {
-	border: 1px solid lightgray;
-	border-radius: 4px;
-}
-
-QSplitter::handle {
-	background-repeat: no-repeat;
-	background-position: center center;
-}
-
-QSplitter::handle:vertical {
-	background-image: url(&quot;:/images/handle_horizontal.png&quot;);
-}
-/*
-QSplitter::handle:horizontal {
-	background-image: url(&quot;:/images/handle_vertical.png&quot;);
-}
-*/
-QTableView {
-	selection-background-color: #cdcdff;
-	selection-color: rgb(0, 0, 0);
-}
-
-QSlider::horizontal {
-	padding-top: 1px;
-	padding-bottom: 1px;
-}
-
-QSlider::groove:horizontal {
-    border: 1px solid #999999;
-    height: 2px; 
-    background: #8f8f91;
-    margin: 2px 0;
-}
-
-QSlider::handle:horizontal {	
-	background-image: url(:/images/handle2s.png);
-    border: 0px;
-    width: 16px;
-    margin: -7px 0; 
-}
-
-QSlider::handle:horizontal:hover {
-	background-image: url(:/images/handle2sh.png);
-}
-
-/*QSlider::sub-page:horizontal {
-    background: red;
-	margin: 1px 0;
-}*/</string>
-  </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="100,1">
     <property name="spacing">
@@ -275,7 +181,7 @@ QSlider::handle:horizontal:hover {
          </property>
          <property name="icon">
           <iconset resource="images.qrc">
-           <normaloff>:/images/fit_1.png</normaloff>:/images/fit_1.png</iconset>
+           <normaloff>:/images/fit.png</normaloff>:/images/fit.png</iconset>
          </property>
          <property name="iconSize">
           <size>
@@ -305,9 +211,6 @@ QSlider::handle:horizontal:hover {
             <width>0</width>
             <height>200</height>
            </size>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">border: 1px solid gray;</string>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_8">
            <property name="leftMargin">
@@ -1277,32 +1180,6 @@ QSlider::handle:horizontal:hover {
              <property name="horizontalSpacing">
               <number>8</number>
              </property>
-             <item row="0" column="1">
-              <widget class="StyledToolButton" name="cmdHome">
-               <property name="minimumSize">
-                <size>
-                 <width>44</width>
-                 <height>44</height>
-                </size>
-               </property>
-               <property name="toolTip">
-                <string>Home</string>
-               </property>
-               <property name="text">
-                <string>...</string>
-               </property>
-               <property name="icon">
-                <iconset resource="images.qrc">
-                 <normaloff>:/images/search_for_home2.png</normaloff>:/images/search_for_home2.png</iconset>
-               </property>
-               <property name="iconSize">
-                <size>
-                 <width>30</width>
-                 <height>30</height>
-                </size>
-               </property>
-              </widget>
-             </item>
              <item row="0" column="2">
               <widget class="StyledToolButton" name="cmdTouch">
                <property name="minimumSize">
@@ -1315,11 +1192,7 @@ QSlider::handle:horizontal:hover {
                 <string>Z-probe</string>
                </property>
                <property name="text">
-                <string>...</string>
-               </property>
-               <property name="icon">
-                <iconset resource="images.qrc">
-                 <normaloff>:/images/search_for_z.png</normaloff>:/images/search_for_z.png</iconset>
+                <string/>
                </property>
                <property name="iconSize">
                 <size>
@@ -1341,11 +1214,7 @@ QSlider::handle:horizontal:hover {
                 <string>Zero XY</string>
                </property>
                <property name="text">
-                <string>...</string>
-               </property>
-               <property name="icon">
-                <iconset resource="images.qrc">
-                 <normaloff>:/images/axis_zero.png</normaloff>:/images/axis_zero.png</iconset>
+                <string/>
                </property>
                <property name="iconSize">
                 <size>
@@ -1367,11 +1236,7 @@ QSlider::handle:horizontal:hover {
                 <string>Zero Z</string>
                </property>
                <property name="text">
-                <string>...</string>
-               </property>
-               <property name="icon">
-                <iconset resource="images.qrc">
-                 <normaloff>:/images/zero_z.png</normaloff>:/images/zero_z.png</iconset>
+                <string/>
                </property>
                <property name="iconSize">
                 <size>
@@ -1396,11 +1261,7 @@ QSlider::handle:horizontal:hover {
                 <string>Restore origin</string>
                </property>
                <property name="text">
-                <string>...</string>
-               </property>
-               <property name="icon">
-                <iconset resource="images.qrc">
-                 <normaloff>:/images/origin.png</normaloff>:/images/origin.png</iconset>
+                <string/>
                </property>
                <property name="iconSize">
                 <size>
@@ -1422,11 +1283,7 @@ QSlider::handle:horizontal:hover {
                 <string>Safe position</string>
                </property>
                <property name="text">
-                <string>...</string>
-               </property>
-               <property name="icon">
-                <iconset resource="images.qrc">
-                 <normaloff>:/images/run.png</normaloff>:/images/run.png</iconset>
+                <string/>
                </property>
                <property name="iconSize">
                 <size>
@@ -1448,11 +1305,7 @@ QSlider::handle:horizontal:hover {
                 <string>Reset</string>
                </property>
                <property name="text">
-                <string>...</string>
-               </property>
-               <property name="icon">
-                <iconset resource="images.qrc">
-                 <normaloff>:/images/restart.png</normaloff>:/images/restart.png</iconset>
+                <string/>
                </property>
                <property name="iconSize">
                 <size>
@@ -1477,16 +1330,34 @@ QSlider::handle:horizontal:hover {
                 <string>Unlock</string>
                </property>
                <property name="text">
-                <string>...</string>
-               </property>
-               <property name="icon">
-                <iconset resource="images.qrc">
-                 <normaloff>:/images/unlock.png</normaloff>:/images/unlock.png</iconset>
+                <string/>
                </property>
                <property name="iconSize">
                 <size>
                  <width>24</width>
                  <height>24</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="StyledToolButton" name="cmdHome">
+               <property name="minimumSize">
+                <size>
+                 <width>44</width>
+                 <height>44</height>
+                </size>
+               </property>
+               <property name="toolTip">
+                <string>Home</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>30</width>
+                 <height>30</height>
                 </size>
                </property>
               </widget>
@@ -1500,11 +1371,6 @@ QSlider::handle:horizontal:hover {
       </item>
       <item>
        <widget class="QSplitter" name="splitPanels">
-        <property name="styleSheet">
-         <string notr="true">QSplitter::handle {
-	background-image: url(&quot;:/images/handle_small.png&quot;);
-}</string>
-        </property>
         <property name="orientation">
          <enum>Qt::Vertical</enum>
         </property>
@@ -1540,9 +1406,9 @@ QSlider::handle:horizontal:hover {
           <property name="geometry">
            <rect>
             <x>0</x>
-            <y>-416</y>
-            <width>228</width>
-            <height>691</height>
+            <y>0</y>
+            <width>232</width>
+            <height>708</height>
            </rect>
           </property>
           <property name="sizePolicy">
@@ -1628,10 +1494,6 @@ QSlider::handle:horizontal:hover {
                      <property name="toolTip">
                       <string>Spindle on/off</string>
                      </property>
-                     <property name="icon">
-                      <iconset resource="images.qrc">
-                       <normaloff>:/images/num2.png</normaloff>:/images/num2.png</iconset>
-                     </property>
                      <property name="iconSize">
                       <size>
                        <width>30</width>
@@ -1653,10 +1515,6 @@ QSlider::handle:horizontal:hover {
                      </property>
                      <property name="toolTip">
                       <string>Spindle on/off</string>
-                     </property>
-                     <property name="icon">
-                      <iconset resource="images.qrc">
-                       <normaloff>:/images/num4.png</normaloff>:/images/num4.png</iconset>
                      </property>
                      <property name="iconSize">
                       <size>
@@ -1680,10 +1538,6 @@ QSlider::handle:horizontal:hover {
                      <property name="toolTip">
                       <string>Spindle on/off</string>
                      </property>
-                     <property name="icon">
-                      <iconset resource="images.qrc">
-                       <normaloff>:/images/num3.png</normaloff>:/images/num3.png</iconset>
-                     </property>
                      <property name="iconSize">
                       <size>
                        <width>30</width>
@@ -1705,10 +1559,6 @@ QSlider::handle:horizontal:hover {
                      </property>
                      <property name="toolTip">
                       <string>Spindle on/off</string>
-                     </property>
-                     <property name="icon">
-                      <iconset resource="images.qrc">
-                       <normaloff>:/images/num1.png</normaloff>:/images/num1.png</iconset>
                      </property>
                      <property name="iconSize">
                       <size>
@@ -1940,10 +1790,6 @@ QSlider::handle:horizontal:hover {
                    <property name="toolTip">
                     <string>Spindle on/off</string>
                    </property>
-                   <property name="icon">
-                    <iconset resource="images.qrc">
-                     <normaloff>:/images/cutter.png</normaloff>:/images/cutter.png</iconset>
-                   </property>
                    <property name="iconSize">
                     <size>
                      <width>28</width>
@@ -2086,11 +1932,7 @@ QSlider::handle:horizontal:hover {
                       <string>X-</string>
                      </property>
                      <property name="text">
-                      <string>...</string>
-                     </property>
-                     <property name="icon">
-                      <iconset resource="images.qrc">
-                       <normaloff>:/images/1401561986_chevron-left.png</normaloff>:/images/1401561986_chevron-left.png</iconset>
+                      <string/>
                      </property>
                      <property name="iconSize">
                       <size>
@@ -2122,13 +1964,6 @@ QSlider::handle:horizontal:hover {
                        <property name="toolTip">
                         <string>Y-</string>
                        </property>
-                       <property name="text">
-                        <string/>
-                       </property>
-                       <property name="icon">
-                        <iconset resource="images.qrc">
-                         <normaloff>:/images/1401562173_chevron-down.png</normaloff>:/images/1401562173_chevron-down.png</iconset>
-                       </property>
                        <property name="iconSize">
                         <size>
                          <width>30</width>
@@ -2138,38 +1973,6 @@ QSlider::handle:horizontal:hover {
                       </widget>
                      </item>
                     </layout>
-                   </item>
-                   <item row="2" column="2">
-                    <widget class="StyledToolButton" name="cmdXPlus">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="minimumSize">
-                      <size>
-                       <width>44</width>
-                       <height>44</height>
-                      </size>
-                     </property>
-                     <property name="toolTip">
-                      <string>X+</string>
-                     </property>
-                     <property name="text">
-                      <string/>
-                     </property>
-                     <property name="icon">
-                      <iconset resource="images.qrc">
-                       <normaloff>:/images/1401562173_chevron-right.png</normaloff>:/images/1401562173_chevron-right.png</iconset>
-                     </property>
-                     <property name="iconSize">
-                      <size>
-                       <width>30</width>
-                       <height>30</height>
-                      </size>
-                     </property>
-                    </widget>
                    </item>
                    <item row="0" column="1">
                     <layout class="QHBoxLayout" name="horizontalLayout_12">
@@ -2195,10 +1998,6 @@ QSlider::handle:horizontal:hover {
                        </property>
                        <property name="text">
                         <string/>
-                       </property>
-                       <property name="icon">
-                        <iconset resource="images.qrc">
-                         <normaloff>:/images/1401562173_chevron-up.png</normaloff>:/images/1401562173_chevron-up.png</iconset>
                        </property>
                        <property name="iconSize">
                         <size>
@@ -2248,10 +2047,6 @@ QSlider::handle:horizontal:hover {
                        <property name="text">
                         <string/>
                        </property>
-                       <property name="icon">
-                        <iconset resource="images.qrc">
-                         <normaloff>:/images/1401562699_icon-arrow-up-b.png</normaloff>:/images/1401562699_icon-arrow-up-b.png</iconset>
-                       </property>
                        <property name="iconSize">
                         <size>
                          <width>28</width>
@@ -2300,10 +2095,6 @@ QSlider::handle:horizontal:hover {
                        <property name="text">
                         <string/>
                        </property>
-                       <property name="icon">
-                        <iconset resource="images.qrc">
-                         <normaloff>:/images/1401562699_icon-arrow-down-b.png</normaloff>:/images/1401562699_icon-arrow-down-b.png</iconset>
-                       </property>
                        <property name="iconSize">
                         <size>
                          <width>28</width>
@@ -2339,10 +2130,6 @@ QSlider::handle:horizontal:hover {
                        <property name="text">
                         <string/>
                        </property>
-                       <property name="icon">
-                        <iconset resource="images.qrc">
-                         <normaloff>:/images/brake.png</normaloff>:/images/brake.png</iconset>
-                       </property>
                        <property name="iconSize">
                         <size>
                          <width>30</width>
@@ -2352,6 +2139,34 @@ QSlider::handle:horizontal:hover {
                       </widget>
                      </item>
                     </layout>
+                   </item>
+                   <item row="2" column="2">
+                    <widget class="StyledToolButton" name="cmdXPlus">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="minimumSize">
+                      <size>
+                       <width>44</width>
+                       <height>44</height>
+                      </size>
+                     </property>
+                     <property name="toolTip">
+                      <string>X+</string>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                     <property name="iconSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                    </widget>
                    </item>
                   </layout>
                  </item>
@@ -2544,11 +2359,6 @@ QSlider::handle:horizontal:hover {
               <layout class="QHBoxLayout" name="horizontalLayout_7" stretch="1,0,0">
                <item>
                 <widget class="ComboBox" name="cboCommand">
-                 <property name="styleSheet">
-                  <string notr="true">padding-top: 3;
-padding-bottom: 3;
-padding-right: 8;</string>
-                 </property>
                  <property name="editable">
                   <bool>true</bool>
                  </property>
@@ -2568,10 +2378,6 @@ padding-right: 8;</string>
                  <property name="toolTip">
                   <string>Send command</string>
                  </property>
-                 <property name="icon">
-                  <iconset resource="images.qrc">
-                   <normaloff>:/images/send_1.png</normaloff>:/images/send_1.png</iconset>
-                 </property>
                  <property name="iconSize">
                   <size>
                    <width>16</width>
@@ -2584,10 +2390,6 @@ padding-right: 8;</string>
                 <widget class="QPushButton" name="cmdClearConsole">
                  <property name="toolTip">
                   <string>Clear console</string>
-                 </property>
-                 <property name="icon">
-                  <iconset resource="images.qrc">
-                   <normaloff>:/images/erase_1.png</normaloff>:/images/erase_1.png</iconset>
                  </property>
                  <property name="iconSize">
                   <size>
@@ -2616,7 +2418,7 @@ padding-right: 8;</string>
      <x>0</x>
      <y>0</y>
      <width>952</width>
-     <height>26</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="mnuFile">
@@ -2644,7 +2446,15 @@ padding-right: 8;</string>
     <property name="title">
      <string>&amp;Service</string>
     </property>
+    <widget class="QMenu" name="menuTheme">
+     <property name="title">
+      <string>Theme</string>
+     </property>
+     <addaction name="actLight"/>
+     <addaction name="actDark"/>
+    </widget>
     <addaction name="actServiceSettings"/>
+    <addaction name="menuTheme"/>
    </widget>
    <widget class="QMenu" name="mnuHelp">
     <property name="title">
@@ -2699,6 +2509,16 @@ padding-right: 8;</string>
   <action name="actFileSaveTransformedAs">
    <property name="text">
     <string>Save &amp;transformed as...</string>
+   </property>
+  </action>
+  <action name="actLight">
+   <property name="text">
+    <string>Light</string>
+   </property>
+  </action>
+  <action name="actDark">
+   <property name="text">
+    <string>Dark</string>
    </property>
   </action>
  </widget>

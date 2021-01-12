@@ -17,6 +17,7 @@
 #include <QDropEvent>
 #include <QProgressDialog>
 #include <exception>
+#include <QGLFormat>
 
 #include "parser/gcodeviewparse.h"
 
@@ -39,6 +40,8 @@
 
 #include "frmsettings.h"
 #include "frmabout.h"
+
+#include "utils/gamepad.h"
 
 #ifdef WINDOWS
     #include <QtWinExtras/QtWinExtras>
@@ -64,12 +67,12 @@ struct CommandQueue {
 
 class CancelException : public std::exception {
 public:
-#ifdef Q_OS_MAC
+#if defined(Q_OS_MAC) || defined(WINDOWS)
 #undef _GLIBCXX_USE_NOEXCEPT
 #define _GLIBCXX_USE_NOEXCEPT _NOEXCEPT
 #endif
 
-    const char* what() const noexcept override
+    const char* what() const _GLIBCXX_USE_NOEXCEPT
     {
         return "Operation was cancelled by user";
     }
@@ -165,7 +168,7 @@ private slots:
     void on_cmdHeightMapCreate_clicked();
     void on_cmdHeightMapBorderAuto_clicked();
     void on_cmdFileAbort_clicked();
-    void on_cmdSpindle_clicked(bool checked);   
+    void on_cmdSpindle_clicked(bool checked);
 
     void on_cmdYPlus_pressed();
 
@@ -193,6 +196,14 @@ private slots:
 
     void on_cmdStop_clicked();
 
+    void on_actLight_triggered();
+
+    void on_actDark_triggered();
+
+    void on_GamepadStateChanged();
+
+    void on_GamepadZeroState();
+
 protected:
     void showEvent(QShowEvent *se);
     void hideEvent(QHideEvent *he);
@@ -204,6 +215,8 @@ protected:
 
 private:
     const int BUFFERLENGTH = 127;
+
+    QPalette m_previous_palette = qApp->palette();
 
     Ui::frmMain *ui;
     GcodeViewParse m_viewParser;
@@ -232,6 +245,7 @@ private:
     bool m_settingsLoading;
 
     QSerialPort m_serialPort;
+    Gamepad m_gamepad;
 
     frmSettings *m_settings;
     frmAbout m_frmAbout;
@@ -243,6 +257,8 @@ private:
 
     bool m_fileChanged = false;
     bool m_heightMapChanged = false;
+
+    int m_currentThemeIndex = 0;
 
     QTimer m_timerConnection;
     QTimer m_timerStateQuery;
@@ -340,6 +356,7 @@ private:
     bool dataIsFloating(QString data);
     bool dataIsEnd(QString data);
     bool dataIsReset(QString data);
+    void applyTheme();
 
     QTime updateProgramEstimatedTime(QList<LineSegment *> lines);
     bool saveProgramToFile(QString fileName, GCodeTableModel *model);

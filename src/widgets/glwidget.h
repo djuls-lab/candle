@@ -12,6 +12,8 @@
 
 #include <QTimer>
 #include <QTime>
+//#include <QTouchEvent>
+#include <QGestureEvent>
 #include "drawers/shaderdrawable.h"
 
 #ifdef GLES
@@ -95,7 +97,11 @@ private:
     double m_xPan, m_yPan, m_xLastPan, m_yLastPan;
     double m_xLookAt, m_yLookAt, m_zLookAt;
     QPoint m_lastPos;
+//    float m_angle;
+//    float m_lastAngle;
+//    double m_lastLength;
     double m_zoom;
+    double m_lastZoom;
     double m_distance;
     double m_xMin, m_xMax, m_yMin, m_yMax, m_zMin, m_zMax, m_xSize, m_ySize, m_zSize;
     double m_lineWidth;
@@ -120,6 +126,14 @@ private:
     QString m_bufferState;
     bool m_updatesEnabled;
 
+    QList<QTouchEvent::TouchPoint> m_touchPoints;
+
+    QVector2D getPanVector();
+    float getPinchScaleRatio();
+    QVector2D getPinchCenterMovementVector();
+    float getPinchRotationAngle();
+    QPointF getPinchCenterPoint();
+
     double normalizeAngle(double angle);
     double calculateVolume(QVector3D size);
     void beginViewAnimation();
@@ -133,6 +147,9 @@ private:
     QColor m_colorBackground;
     QColor m_colorText;
 
+    QPointF m_currentTouchPointPos;
+//    bool m_release2touch;
+
 protected:
     void initializeGL();
     void resizeGL(int width, int height);
@@ -144,9 +161,19 @@ protected:
     void paintEvent(QPaintEvent *pe);
 #endif
 
+//    void mousePressEvent(QMouseEvent *event);
+//    void mouseMoveEvent(QMouseEvent *event);
+    void wheelEvent(QWheelEvent *we);
+//    void touchEvent(QTouchEvent *te);
+    bool event(QEvent *event);
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
-    void wheelEvent(QWheelEvent *we);
+    void mouseReleaseEvent(QMouseEvent *event);
+    void mouseDoubleClickEvent(QMouseEvent *event);
+//    bool gestureEvent(QGestureEvent *event);
+//    void panTriggered(QPanGesture *);
+//    void pinchTriggered(QPinchGesture *);
+//    void swipeTriggered(QSwipeGesture *);
 
     void timerEvent(QTimerEvent *);
 };

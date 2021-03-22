@@ -33,8 +33,10 @@
 #include <QLayout>
 #include <QMimeData>
 #include <QStyleFactory>
+#include <QScroller>
 #include "frmmain.h"
 #include "ui_frmmain.h"
+#include "widgets/messagebox.h"
 
 frmMain::frmMain(QWidget *parent) :
     QMainWindow(parent),
@@ -91,7 +93,10 @@ frmMain::frmMain(QWidget *parent) :
 
     m_settings = new frmSettings(this);    
 
-    ui->setupUi(this);    
+    ui->setupUi(this);
+
+    QVBoxLayout *layout = static_cast<QVBoxLayout*>(ui->grpProgram->layout()); // TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    layout->insertWidget(0, ui->menuBar); // TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 #ifdef WINDOWS
@@ -102,9 +107,11 @@ frmMain::frmMain(QWidget *parent) :
 #endif
 
 //#ifndef UNIX
-//    ui->cboCommand->setStyleSheet("QComboBox {padding: 2;} QComboBox::drop-down {width: 0; border-style: none;} QComboBox::down-arrow {image: url(noimg);	border-width: 0;}");
+//    ui->txtCommand->setStyleSheet("QComboBox {padding: 2;} QComboBox::drop-down {width: 0; border-style: none;} QComboBox::down-arrow {image: url(noimg);	border-width: 0;}");
 //#endif
 //    ui->scrollArea->updateMinimumWidth();
+
+    connect(ui->grpConsole, SIGNAL(toggled(bool)), this, SLOT(on_grpConsole_toggled(bool))); // TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     m_heightMapMode = false;
     m_lastDrawnLineIndex = 0;
@@ -114,10 +121,10 @@ frmMain::frmMain(QWidget *parent) :
     m_currentModel = &m_programModel;
     m_transferCompleted = true;
 
-    ui->cmdXMinus->setBackColor(QColor(153, 180, 209));
-    ui->cmdXPlus->setBackColor(ui->cmdXMinus->backColor());
-    ui->cmdYMinus->setBackColor(ui->cmdXMinus->backColor());
-    ui->cmdYPlus->setBackColor(ui->cmdXMinus->backColor());
+//    ui->cmdXMinus->setBackColor(QColor(153, 180, 209));
+//    ui->cmdXPlus->setBackColor(ui->cmdXMinus->backColor());
+//    ui->cmdYMinus->setBackColor(ui->cmdXMinus->backColor());
+//    ui->cmdYPlus->setBackColor(ui->cmdXMinus->backColor());
 
     ui->cmdFit->setParent(ui->glwVisualizer);
     ui->cmdIsometric->setParent(ui->glwVisualizer);
@@ -132,8 +139,8 @@ frmMain::frmMain(QWidget *parent) :
 
     ui->cboJogStep->setValidator(new QDoubleValidator(0, 10000, 2));
     ui->cboJogFeed->setValidator(new QIntValidator(0, 100000));
-    connect(ui->cboJogStep, &ComboBoxKey::currentTextChanged, [=] (QString) {updateJogTitle();});
-    connect(ui->cboJogFeed, &ComboBoxKey::currentTextChanged, [=] (QString) {updateJogTitle();});
+    connect(ui->cboJogStep, &ComboBox::currentTextChanged, [=] (QString) {updateJogTitle();});
+    connect(ui->cboJogFeed, &ComboBox::currentTextChanged, [=] (QString) {updateJogTitle();});
 
     // Prepare "Send"-button
     ui->cmdFileSend->setMinimumWidth(qMax(ui->cmdFileSend->width(), ui->cmdFileOpen->width()));
@@ -141,9 +148,9 @@ frmMain::frmMain(QWidget *parent) :
     menuSend->addAction(tr("Send from current line"), this, SLOT(onActSendFromLineTriggered()));
     ui->cmdFileSend->setMenu(menuSend);
 
-    connect(ui->cboCommand, SIGNAL(returnPressed()), this, SLOT(onCboCommandReturnPressed()));
+    connect(ui->txtCommand, SIGNAL(returnPressed()), this, SLOT(ontxtCommandReturnPressed()));
 
-    foreach (StyledToolButton* button, this->findChildren<StyledToolButton*>(QRegExp("cmdUser\\d"))) {
+    foreach (QToolButton* button, this->findChildren<QToolButton*>(QRegExp("cmdUser\\d"))) {
         connect(button, SIGNAL(clicked(bool)), this, SLOT(onCmdUserClicked(bool)));
     }
 
@@ -230,8 +237,8 @@ frmMain::frmMain(QWidget *parent) :
     clearTable();
 
     // Console window handling
-    connect(ui->grpConsole, SIGNAL(resized(QSize)), this, SLOT(onConsoleResized(QSize)));
-    connect(ui->scrollAreaWidgetContents, SIGNAL(sizeChanged(QSize)), this, SLOT(onPanelsSizeChanged(QSize)));
+//    connect(ui->grpConsole, SIGNAL(resized(QSize)), this, SLOT(onConsoleResized(QSize)));
+//    connect(ui->scrollAreaWidgetContents, SIGNAL(sizeChanged(QSize)), this, SLOT(onPanelsSizeChanged(QSize)));
 
     m_senderErrorBox = new QMessageBox(QMessageBox::Warning, qApp->applicationDisplayName(), QString(),
                                        QMessageBox::Ignore | QMessageBox::Abort, this);
@@ -247,7 +254,7 @@ frmMain::frmMain(QWidget *parent) :
     updateControlsState();
 
     // Prepare jog buttons
-    foreach (StyledToolButton* button, ui->grpJog->findChildren<StyledToolButton*>(QRegExp("cmdJogFeed\\d")))
+    foreach (QToolButton* button, ui->grpJog->findChildren<QToolButton*>(QRegExp("cmdJogFeed\\d")))
     {
         connect(button, SIGNAL(clicked(bool)), this, SLOT(onCmdJogFeedClicked()));
     }
@@ -277,24 +284,21 @@ frmMain::frmMain(QWidget *parent) :
     connect(&m_serialPort, SIGNAL(error(QSerialPort::SerialPortError)), this, SLOT(onSerialPortError(QSerialPort::SerialPortError)));
 
 
-
-
     // Setup gamepad
     connect(&m_gamepad,SIGNAL(stateChanged()),this,SLOT(on_GamepadStateChanged()));
     connect(&m_gamepad,SIGNAL(zeroState()),this,SLOT(on_GamepadZeroState()));
 
 
-
-
-
+//    this->setAttribute(Qt::WA_AcceptTouchEvents); // TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//    ui->glwVisualizer->setAttribute(Qt::WA_AcceptTouchEvents); // TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
     this->installEventFilter(this);
     ui->tblProgram->installEventFilter(this);
     ui->cboJogStep->installEventFilter(this);
     ui->cboJogFeed->installEventFilter(this);
-    ui->splitPanels->handle(1)->installEventFilter(this);
-    ui->splitPanels->installEventFilter(this);
+//    ui->splitPanels->handle(1)->installEventFilter(this);
+//    ui->splitPanels->installEventFilter(this);
 
     connect(&m_timerConnection, SIGNAL(timeout()), this, SLOT(onTimerConnection()));
     connect(&m_timerStateQuery, SIGNAL(timeout()), this, SLOT(onTimerStateQuery()));
@@ -305,6 +309,8 @@ frmMain::frmMain(QWidget *parent) :
     if (qApp->arguments().count() > 1 && isGCodeFile(qApp->arguments().last())) {
         loadFile(qApp->arguments().last());
     }
+
+    this->setFocusPolicy(Qt::FocusPolicy::ClickFocus); // TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 }
 
 frmMain::~frmMain()
@@ -402,6 +408,9 @@ void frmMain::loadSettings()
     m_settings->setQueryStateTime(set.value("queryStateTime", 40).toInt());
 
     m_settings->setPanelUserCommands(set.value("panelUserCommandsVisible", true).toBool());
+    m_settings->setPanelControl(set.value("panelControlVisible", true).toBool());
+    m_settings->setPanelConsole(set.value("panelConsoleVisible", true).toBool());
+    m_settings->setPanelState(set.value("panelStateVisible", true).toBool());
     m_settings->setPanelHeightmap(set.value("panelHeightmapVisible", true).toBool());
     m_settings->setPanelSpindle(set.value("panelSpindleVisible", true).toBool());
     m_settings->setPanelOverriding(set.value("panelOverridingVisible", true).toBool());
@@ -448,9 +457,11 @@ void frmMain::loadSettings()
     ui->chkAutoScroll->setVisible(ui->splitter->sizes()[1]);
     resizeCheckBoxes();
 
-    ui->cboCommand->setMinimumHeight(ui->cboCommand->height());
-    ui->cmdClearConsole->setFixedHeight(ui->cboCommand->height());
-    ui->cmdCommandSend->setFixedHeight(ui->cboCommand->height());
+    ui->vertSplitter->restoreState(set.value("vertSplitter", QByteArray()).toByteArray());
+
+    ui->txtCommand->setMinimumHeight(ui->txtCommand->height());
+//    ui->cmdClearConsole->setFixedHeight(ui->txtCommand->height());
+//    ui->cmdCommandSend->setFixedHeight(ui->txtCommand->height());
 
     m_storedKeyboardControl = set.value("keyboardControl", false).toBool();
 
@@ -458,7 +469,7 @@ void frmMain::loadSettings()
     m_settings->setTouchCommand(set.value("touchCommand").toString());
     m_settings->setSafePositionCommand(set.value("safePositionCommand").toString());
 
-    foreach (StyledToolButton* button, this->findChildren<StyledToolButton*>(QRegExp("cmdUser\\d"))) {
+    foreach (QToolButton* button, this->findChildren<QToolButton*>(QRegExp("cmdUser\\d"))) {
         int i = button->objectName().right(1).toInt();
         m_settings->setUserCommands(i, set.value(QString("userCommands%1").arg(i)).toString());
     }
@@ -499,18 +510,23 @@ void frmMain::loadSettings()
     // Update right panel width
     applySettings();
     show();
-    ui->scrollArea->updateMinimumWidth();
+//    ui->scrollArea->updateMinimumWidth();
+    ui->scrollArea->viewport()->setAttribute(Qt::WA_AcceptTouchEvents); // TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    QScroller::grabGesture(this->ui->scrollArea->viewport(), QScroller::LeftMouseButtonGesture); // TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     // Restore panels state
     ui->grpUserCommands->setChecked(set.value("userCommandsPanel", true).toBool());
+    ui->grpControl->setChecked(set.value("controlPanel", true).toBool());
+    ui->grpConsole->setChecked(set.value("consolePanel", true).toBool());
+    ui->grpState->setChecked(set.value("statePanel", true).toBool());
     ui->grpHeightMap->setChecked(set.value("heightmapPanel", false).toBool());
     ui->grpSpindle->setChecked(set.value("spindlePanel", false).toBool());
     ui->grpOverriding->setChecked(set.value("feedPanel", false).toBool());
     ui->grpJog->setChecked(set.value("jogPanel", true).toBool());
 
     // Restore last commands list
-    ui->cboCommand->addItems(set.value("recentCommands", QStringList()).toStringList());
-    ui->cboCommand->setCurrentIndex(-1);
+    ui->txtCommand->addItems(set.value("recentCommands", QStringList()).toStringList());
+//    ui->txtCommand->setCurrentIndex(-1);
 
     m_settingsLoading = false;
 }
@@ -561,9 +577,13 @@ void frmMain::saveSettings()
     set.setValue("autoScroll", ui->chkAutoScroll->isChecked());
     set.setValue("header", ui->tblProgram->horizontalHeader()->saveState());
     set.setValue("splitter", ui->splitter->saveState());
+    set.setValue("vertSplitter", ui->vertSplitter->saveState());
     set.setValue("formGeometry", this->saveGeometry());
     set.setValue("formSettingsSize", m_settings->size());    
     set.setValue("userCommandsPanel", ui->grpUserCommands->isChecked());
+    set.setValue("controlPanel", ui->grpControl->isChecked());
+    set.setValue("consolePanel", ui->grpConsole->isChecked());
+    set.setValue("statePanel", ui->grpState->isChecked());
     set.setValue("heightmapPanel", ui->grpHeightMap->isChecked());
     set.setValue("spindlePanel", ui->grpSpindle->isChecked());
     set.setValue("feedPanel", ui->grpOverriding->isChecked());
@@ -580,6 +600,9 @@ void frmMain::saveSettings()
     set.setValue("touchCommand", m_settings->touchCommand());
     set.setValue("safePositionCommand", m_settings->safePositionCommand());
     set.setValue("panelUserCommandsVisible", m_settings->panelUserCommands());
+    set.setValue("panelControlVisible", m_settings->panelControl());
+    set.setValue("panelConsoleVisible", m_settings->panelConsole());
+    set.setValue("panelStateVisible", m_settings->panelState());
     set.setValue("panelHeightmapVisible", m_settings->panelHeightmap());
     set.setValue("panelSpindleVisible", m_settings->panelSpindle());
     set.setValue("panelOverridingVisible", m_settings->panelOverriding());
@@ -594,7 +617,7 @@ void frmMain::saveSettings()
     set.setValue("spindleOverride", ui->slbSpindleOverride->isChecked());
     set.setValue("spindleOverrideValue", ui->slbSpindleOverride->value());
 
-    foreach (StyledToolButton* button, this->findChildren<StyledToolButton*>(QRegExp("cmdUser\\d"))) {
+    foreach (QToolButton* button, this->findChildren<QToolButton*>(QRegExp("cmdUser\\d"))) {
         int i = button->objectName().right(1).toInt();
         set.setValue(QString("userCommands%1").arg(i), m_settings->userCommands(i));
     }
@@ -626,16 +649,17 @@ void frmMain::saveSettings()
         set.setValue(name, pick->color().name());
     }
 
-    QStringList list;
+//    QStringList list;
 
-    for (int i = 0; i < ui->cboCommand->count(); i++) list.append(ui->cboCommand->itemText(i));
-    set.setValue("recentCommands", list);
+//    for (int i = 0; i < ui->txtCommand->count(); i++) list.append(ui->txtCommand->itemText(i));
+//    set.setValue("recentCommands", list);
+    set.setValue("recentCommands", ui->txtCommand->items());
 }
 
 bool frmMain::saveChanges(bool heightMapMode)
 {
     if ((!heightMapMode && m_fileChanged)) {
-        int res = QMessageBox::warning(this, this->windowTitle(), tr("G-code program file was changed. Save?"),
+        int res = MessageBox::warning(this, this->windowTitle(), tr("G-code program file was changed. Save?"),
                                        QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
         if (res == QMessageBox::Cancel) return false;
         else if (res == QMessageBox::Yes) on_actFileSave_triggered();
@@ -643,7 +667,7 @@ bool frmMain::saveChanges(bool heightMapMode)
     }
 
     if (m_heightMapChanged) {
-        int res = QMessageBox::warning(this, this->windowTitle(), tr("Heightmap file was changed. Save?"),
+        int res = MessageBox::warning(this, this->windowTitle(), tr("Heightmap file was changed. Save?"),
                                        QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
         if (res == QMessageBox::Cancel) return false;
         else if (res == QMessageBox::Yes) {
@@ -669,7 +693,7 @@ void frmMain::updateControlsState() {
     ui->widgetJog->setEnabled(portOpened && !m_processingFile);
     ui->grpConsole->setEnabled(portOpened);
     ui->widgetFeed->setEnabled(portOpened);
-    ui->cboCommand->setEnabled(portOpened && (!ui->chkKeyboardControl->isChecked()));
+    ui->txtCommand->setEnabled(portOpened && (!ui->chkKeyboardControl->isChecked()));
     ui->cmdCommandSend->setEnabled(portOpened);
 //    ui->widgetFeed->setEnabled(!m_transferringFile);
 
@@ -700,9 +724,11 @@ void frmMain::updateControlsState() {
                                                          QAbstractItemView::DoubleClicked | QAbstractItemView::SelectedClicked
                                                          | QAbstractItemView::EditKeyPressed | QAbstractItemView::AnyKeyPressed);
 
+    ui->txtStatus->setMinimumHeight(32);
+
     if (!portOpened) {
         ui->txtStatus->setText(tr("Not connected"));
-        ui->txtStatus->setStyleSheet(QString("background-color: palette(button); color: palette(text);"));
+        ui->txtStatus->setStyleSheet(QString("border: none; border-radius: 3px; background-color: palette(button); color: palette(text);"));
     }
 
     this->setWindowTitle(m_programFileName.isEmpty() ? qApp->applicationDisplayName()
@@ -732,7 +758,7 @@ void frmMain::updateControlsState() {
     m_heightMapGridDrawer.setVisible(ui->chkHeightMapGridShow->isChecked() && m_heightMapMode);
     m_heightMapInterpolationDrawer.setVisible(ui->chkHeightMapInterpolationShow->isChecked() && m_heightMapMode);
 
-    ui->grpProgram->setTitle(m_heightMapMode ? tr("Heightmap") : tr("G-code program"));
+//    ui->grpProgram->setTitle(m_heightMapMode ? tr("Heightmap") : tr("G-code program"));
     ui->grpProgram->setProperty("overrided", m_heightMapMode);
     style()->unpolish(ui->grpProgram);
     ui->grpProgram->ensurePolished();
@@ -769,7 +795,7 @@ void frmMain::openPort()
 {
     if (m_serialPort.open(QIODevice::ReadWrite)) {
         ui->txtStatus->setText(tr("Port opened"));
-        ui->txtStatus->setStyleSheet(QString("background-color: palette(button); color: palette(text);"));
+        ui->txtStatus->setStyleSheet(QString("border: none; border-radius: 3px; background-color: palette(button); color: palette(text);"));
 //        updateControlsState();
         grblReset();
     }
@@ -891,6 +917,8 @@ void frmMain::onSerialPortReadyRead()
 
         // Status response
         if (data[0] == '<') {
+//            qDebug() << "data: " << data;
+
             int status = -1;
 
             m_statusReceived = true;
@@ -912,9 +940,9 @@ void frmMain::onSerialPortReadyRead()
                 if (status == -1) status = 0;
 
                 // Update status
-                if (status != m_lastGrblStatus) {
+                if (status != m_lastGrblStatus) {                    
                     ui->txtStatus->setText(m_statusCaptions[status]);
-                    ui->txtStatus->setStyleSheet(QString("background-color: %1; color: %2;")
+                    ui->txtStatus->setStyleSheet(QString("border: none; border-radius: 3px; background-color: %1; color: %2;")
                                                  .arg(m_statusBackColors[status]).arg(m_statusForeColors[status]));
                 }
 
@@ -966,7 +994,7 @@ void frmMain::onSerialPortReadyRead()
                     m_timerStateQuery.stop();
                     m_timerConnection.stop();
 
-                    QMessageBox::information(this, qApp->applicationDisplayName(), tr("Job done.\nTime elapsed: %1")
+                    MessageBox::information(this, qApp->applicationDisplayName(), tr("Job done.\nTime elapsed: %1")
                                              .arg(ui->glwVisualizer->spendTime().toString("hh:mm:ss")));
 
                     m_timerStateQuery.setInterval(m_settings->queryStateTime());
@@ -1380,6 +1408,9 @@ void frmMain::onSerialPortReadyRead()
                 if (dataIsReset(data)) {
                     qDebug() << "hardware reset";
 
+//                    ui->txtStatus->setText(tr("Hardware Reset"));
+//                    ui->txtStatus->setStyleSheet(QString("background-color: red; color: white"));
+
                     m_processingFile = false;
                     m_transferCompleted = true;
                     m_fileCommandIndex = 0;
@@ -1581,8 +1612,19 @@ void frmMain::closeEvent(QCloseEvent *ce)
         return;
     }
 
-    if (m_processingFile && QMessageBox::warning(this, this->windowTitle(), tr("File sending in progress. Terminate and exit?"),
+    if (m_processingFile && MessageBox::warning(this, this->windowTitle(), tr("File sending in progress. Terminate and exit?"),
                                                    QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
+//    MessageBox *mb = new MessageBox(this);
+////    mb->setWindowFlags(Qt::FramelessWindowHint |Qt::WindowStaysOnTopHint);
+//    mb->setInformativeText(tr("File sending in progress. Terminate and exit?"));
+////    mb->setWindowTitle(this->windowTitle());
+////    mb->setWindowFlags(Qt::Dialog);
+////    mb->setIcon(QMessageBox::NoIcon);
+//    mb->addButton( "&Yes", QMessageBox::YesRole);
+//    QPushButton *noBtn = mb->addButton( "&No", QMessageBox::NoRole);
+//    mb->setDefaultButton(noBtn);
+
+//    if (m_processingFile && mb->exec()) {
         ce->ignore();
         m_heightMapMode = mode;
         return;
@@ -1647,8 +1689,25 @@ void frmMain::on_cmdFileOpen_clicked()
     if (!m_heightMapMode) {
         if (!saveChanges(false)) return;
 
-        QString fileName  = QFileDialog::getOpenFileName(this, tr("Open"), m_lastFolder,
-                                   tr("G-Code files (*.nc *.ncc *.ngc *.tap *.txt);;All files (*.*)"));
+
+//        QFileDialog dialog(qApp->activeWindow(), tr("Open"), m_lastFolder, tr("G-Code files (*.nc *.ncc *.ngc *.tap *.txt);;All files (*.*)"));
+////        dialog.setOptions(QFileDialog::DontResolveSymlinks|QFileDialog::DontUseNativeDialog|QFileDialog::DontUseSheet);
+////        dialog.setWindowFlags(Qt::Dialog | Qt::WindowStaysOnTopHint | Qt::X11BypassWindowManagerHint);
+////        dialog.setFileMode(QFileDialog::ExistingFile);
+////        dialog.setContextMenuPolicy(Qt::CustomContextMenu);
+////        dialog.setWindowFlags(Qt::Dialog);
+//        dialog.setWindowFlags(dialog.windowFlags() | Qt::WindowStaysOnTopHint);
+//        dialog.setWindowModality(Qt::ApplicationModal);
+//        dialog.setGeometry(this->geometry());
+//        dialog.show();
+////        dialog.setViewMode(QFileDialog::List);
+//        QString fileName;
+//        if (dialog.exec() == QDialog::Accepted) {
+//            fileName = dialog.selectedFiles().value(0);
+//        }
+
+        QString fileName = QFileDialog::getOpenFileName(this, tr("Open"), m_lastFolder,
+                                           tr("G-Code files (*.nc *.ncc *.ngc *.tap *.txt);;All files (*.*)"));
 
         if (!fileName.isEmpty()) m_lastFolder = fileName.left(fileName.lastIndexOf(QRegExp("[/\\\\]+")));
 
@@ -1810,7 +1869,7 @@ void frmMain::loadFile(QString fileName)
     QFile file(fileName);
 
     if (!file.open(QIODevice::ReadOnly)) {
-        QMessageBox::critical(this, this->windowTitle(), tr("Can't open file:\n") + fileName);
+        MessageBox::critical(this, this->windowTitle(), tr("Can't open file:\n") + fileName);
         return;
     }
 
@@ -2177,7 +2236,7 @@ void frmMain::onTableInsertLine()
 void frmMain::onTableDeleteLines()
 {
     if (ui->tblProgram->selectionModel()->selectedRows().count() == 0 || m_processingFile ||
-            QMessageBox::warning(this, this->windowTitle(), tr("Delete lines?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) return;
+            MessageBox::warning(this, this->windowTitle(), tr("Delete lines?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) return;
 
     QModelIndex firstRow = ui->tblProgram->selectionModel()->selectedRows()[0];
     int rowsCount = ui->tblProgram->selectionModel()->selectedRows().count();
@@ -2218,7 +2277,7 @@ void frmMain::on_actServiceSettings_triggered()
     }
 }
 
-bool buttonLessThan(StyledToolButton *b1, StyledToolButton *b2)
+bool buttonLessThan(QToolButton *b1, QToolButton *b2)
 {
 //    return b1->text().toDouble() < b2->text().toDouble();
     return b1->objectName().right(1).toDouble() < b2->objectName().right(1).toDouble();
@@ -2253,12 +2312,15 @@ void frmMain::applySettings() {
                                || m_settings->panelJog() || m_settings->panelSpindle());
 
     ui->grpUserCommands->setVisible(m_settings->panelUserCommands());
+    ui->grpControl->setVisible(m_settings->panelControl());
+    ui->grpConsole->setVisible(m_settings->panelConsole());
+    ui->grpState->setVisible(m_settings->panelState());
     ui->grpHeightMap->setVisible(m_settings->panelHeightmap());
     ui->grpSpindle->setVisible(m_settings->panelSpindle());
     ui->grpOverriding->setVisible(m_settings->panelOverriding());
     ui->grpJog->setVisible(m_settings->panelJog());
 
-    ui->cboCommand->setAutoCompletion(m_settings->autoCompletion());
+    ui->txtCommand->setAutoCompletion(m_settings->autoCompletion());
 
     m_codeDrawer->setSimplify(m_settings->simplify());
     m_codeDrawer->setSimplifyPrecision(m_settings->simplifyPrecision());
@@ -2276,11 +2338,11 @@ void frmMain::applySettings() {
 
     m_selectionDrawer.setColor(m_settings->colors("ToolpathHighlight"));
 
-    ui->cboCommand->setMinimumHeight(ui->cboCommand->height());
-    ui->cmdClearConsole->setFixedHeight(ui->cboCommand->height());
-    ui->cmdCommandSend->setFixedHeight(ui->cboCommand->height());
+    ui->txtCommand->setMinimumHeight(ui->txtCommand->height());
+//    ui->cmdClearConsole->setFixedHeight(ui->txtCommand->height());
+//    ui->cmdCommandSend->setFixedHeight(ui->txtCommand->height());
 
-    foreach (StyledToolButton* button, this->findChildren<StyledToolButton*>(QRegExp("cmdUser\\d"))) {
+    foreach (QToolButton* button, this->findChildren<QToolButton*>(QRegExp("cmdUser\\d"))) {
         button->setToolTip(m_settings->userCommands(button->objectName().right(1).toInt()));
         button->setEnabled(!button->toolTip().isEmpty());
     }
@@ -2322,10 +2384,12 @@ void frmMain::applyTheme()
     if (m_currentThemeIndex==1) {
         // Dark Mode
         QPalette darkPalette;
-        darkPalette.setColor(QPalette::Window, QColor(53, 53, 53));
+//        darkPalette.setColor(QPalette::Window, QColor(53, 53, 53));
+        darkPalette.setColor(QPalette::Window, QColor(43, 43, 43));
         darkPalette.setColor(QPalette::WindowText, Qt::white);
         darkPalette.setColor(QPalette::Disabled, QPalette::WindowText, QColor(127, 127, 127));
-        darkPalette.setColor(QPalette::Base, QColor(42, 42, 42));
+//        darkPalette.setColor(QPalette::Base, QColor(43, 43, 43));
+        darkPalette.setColor(QPalette::Base, QColor(33, 33, 33));
         darkPalette.setColor(QPalette::AlternateBase, QColor(66, 66, 66));
         darkPalette.setColor(QPalette::ToolTipBase, Qt::white);
         darkPalette.setColor(QPalette::ToolTipText, QColor(53, 53, 53));
@@ -2333,7 +2397,9 @@ void frmMain::applyTheme()
         darkPalette.setColor(QPalette::Disabled, QPalette::Text, QColor(127, 127, 127));
         darkPalette.setColor(QPalette::Dark, QColor(35, 35, 35));
         darkPalette.setColor(QPalette::Shadow, QColor(20, 20, 20));
-        darkPalette.setColor(QPalette::Button, QColor(53, 53, 53));
+//        darkPalette.setColor(QPalette::Button, QColor(53, 53, 53));
+        darkPalette.setColor(QPalette::Button, QColor(63, 63, 63));
+        darkPalette.setColor(QPalette::Disabled, QPalette::Button, QColor(73, 73, 73));
 //        darkPalette.setColor(QPalette::ButtonText, QColor(196, 196, 196));
         darkPalette.setColor(QPalette::ButtonText, QColor(225, 225, 225));
         darkPalette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor(127, 127, 127));
@@ -2352,29 +2418,30 @@ void frmMain::applyTheme()
         pathDrawnColor = darkPalette.color(QPalette::Foreground);
 
         QColor buttonTextColor = palette().color(QPalette::ButtonText);
+        QColor buttonDisabledTextColor = palette().color(QPalette::Disabled, QPalette::ButtonText);
 
-        Util::changeButtonIconColor(ui->cmdHome, buttonTextColor);
-        Util::changeButtonIconColor(ui->cmdTouch, buttonTextColor);
-        Util::changeButtonIconColor(ui->cmdZeroXY, buttonTextColor);
-        Util::changeButtonIconColor(ui->cmdZeroZ, buttonTextColor);
-        Util::changeButtonIconColor(ui->cmdRestoreOrigin, buttonTextColor);
-        Util::changeButtonIconColor(ui->cmdSafePosition, buttonTextColor);
-        Util::changeButtonIconColor(ui->cmdReset, buttonTextColor);
-        Util::changeButtonIconColor(ui->cmdUnlock, buttonTextColor);
-        Util::changeButtonIconColor(ui->cmdXMinus, buttonTextColor);
-        Util::changeButtonIconColor(ui->cmdYPlus, buttonTextColor);
-        Util::changeButtonIconColor(ui->cmdYMinus, buttonTextColor);
-        Util::changeButtonIconColor(ui->cmdStop, buttonTextColor);
-        Util::changeButtonIconColor(ui->cmdXPlus, buttonTextColor);
-        Util::changeButtonIconColor(ui->cmdZPlus, buttonTextColor);
-        Util::changeButtonIconColor(ui->cmdZMinus, buttonTextColor);
-        Util::changeButtonIconColor(ui->cmdUser0, buttonTextColor);
-        Util::changeButtonIconColor(ui->cmdUser1, buttonTextColor);
-        Util::changeButtonIconColor(ui->cmdUser2, buttonTextColor);
-        Util::changeButtonIconColor(ui->cmdUser3, buttonTextColor);
-        Util::changeButtonIconColor(ui->cmdSpindle, buttonTextColor);
-        Util::changeButtonIconColor(ui->cmdCommandSend, buttonTextColor);
-        Util::changeButtonIconColor(ui->cmdClearConsole, buttonTextColor);
+        Util::changeButtonIconColor(ui->cmdHome, buttonTextColor, buttonDisabledTextColor);
+        Util::changeButtonIconColor(ui->cmdTouch, buttonTextColor, buttonDisabledTextColor);
+        Util::changeButtonIconColor(ui->cmdZeroXY, buttonTextColor, buttonDisabledTextColor);
+        Util::changeButtonIconColor(ui->cmdZeroZ, buttonTextColor, buttonDisabledTextColor);
+        Util::changeButtonIconColor(ui->cmdRestoreOrigin, buttonTextColor, buttonDisabledTextColor);
+        Util::changeButtonIconColor(ui->cmdSafePosition, buttonTextColor, buttonDisabledTextColor);
+        Util::changeButtonIconColor(ui->cmdReset, buttonTextColor, buttonDisabledTextColor);
+        Util::changeButtonIconColor(ui->cmdUnlock, buttonTextColor, buttonDisabledTextColor);
+        Util::changeButtonIconColor(ui->cmdXMinus, buttonTextColor, buttonDisabledTextColor);
+        Util::changeButtonIconColor(ui->cmdYPlus, buttonTextColor, buttonDisabledTextColor);
+        Util::changeButtonIconColor(ui->cmdYMinus, buttonTextColor, buttonDisabledTextColor);
+        Util::changeButtonIconColor(ui->cmdStop, buttonTextColor, buttonDisabledTextColor);
+        Util::changeButtonIconColor(ui->cmdXPlus, buttonTextColor, buttonDisabledTextColor);
+        Util::changeButtonIconColor(ui->cmdZPlus, buttonTextColor, buttonDisabledTextColor);
+        Util::changeButtonIconColor(ui->cmdZMinus, buttonTextColor, buttonDisabledTextColor);
+        Util::changeButtonIconColor(ui->cmdUser0, buttonTextColor, buttonDisabledTextColor);
+        Util::changeButtonIconColor(ui->cmdUser1, buttonTextColor, buttonDisabledTextColor);
+        Util::changeButtonIconColor(ui->cmdUser2, buttonTextColor, buttonDisabledTextColor);
+        Util::changeButtonIconColor(ui->cmdUser3, buttonTextColor, buttonDisabledTextColor);
+        Util::changeButtonIconColor(ui->cmdSpindle, buttonTextColor, buttonDisabledTextColor);
+        Util::changeButtonIconColor(ui->cmdCommandSend, buttonTextColor, buttonDisabledTextColor);
+        Util::changeButtonIconColor(ui->cmdClearConsole, buttonTextColor, buttonDisabledTextColor);
 
         Util::invertButtonIconColors(ui->cmdFit);
         Util::invertButtonIconColors(ui->cmdIsometric);
@@ -2400,6 +2467,7 @@ void frmMain::applyTheme()
         m_previous_palette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor(127, 127, 127));
         m_previous_palette.setColor(QPalette::Disabled, QPalette::Highlight, QColor(196, 196, 196));
         m_previous_palette.setColor(QPalette::Disabled, QPalette::HighlightedText, QColor(127, 127, 127));
+        m_previous_palette.setColor(QPalette::Button, QColor(196, 196, 196));
 
         qApp->setPalette(m_previous_palette);
 
@@ -2427,39 +2495,68 @@ void frmMain::applyTheme()
     m_codeDrawer->setColorDrawn(pathDrawnColor);
     m_codeDrawer->update();
 
-    QColor sliderHandleHoverColor, sliderHandleBorderHoverColor, sliderHandleDisabledColor, sliderHandleBorderDisabledColor;
+    QColor sliderHandleHoverColor, sliderHandleBorderHoverColor, sliderHandleDisabledColor, sliderHandleBorderDisabledColor, buttonDisabledColor;
 
     sliderHandleHoverColor = QColor(128, 128, 128);
     sliderHandleBorderHoverColor = QColor(48, 48, 48);
     sliderHandleDisabledColor = Qt::gray;
     sliderHandleBorderDisabledColor = Qt::darkGray;
+    buttonDisabledColor = qApp->palette().color(QPalette::Button).lighter();
     if (m_currentThemeIndex == 1) {
         sliderHandleHoverColor = QColor(196, 196, 196);
         sliderHandleBorderHoverColor = QColor(235, 235, 235);
         sliderHandleDisabledColor = Qt::darkGray;
         sliderHandleBorderDisabledColor = Qt::gray;
+//        buttonDisabledColor = QColor(128, 128, 128);
     }
 
     qApp->setStyleSheet(QString(" \
-        QWidget { font-size: 9pt; } \
-        QHeaderView::section {height: 22px; background-color: palette(base); border: none; border-right: 1px solid rgba(128, 128, 128, 64); } \
+        QWidget { font-size: 12pt; font-weight: normal; } \
+        QMenuBar { border: none; min-height: 48px; spacing: 9px; } \
+        QMenuBar::item { padding: 3px; padding-left: 24px; padding-right: 24px; } \
+        QMenuBar::item:selected { background-color: palette(highlight); color: palette(highlighted-text); border-radius: 2px; } \
+        QMenu { background-color: palette(base); } \
+        QMenu::item { height: 48px; padding-left: 24px; padding-right: 24px;  margin: 3px; } \
+        QMenu::item:selected { background-color: palette(highlight); color: palette(highlighted-text); border-radius: 2px; } \
+        QPushButton { border: none; border-radius: 2px; background-color: palette(button); min-height: 48px; padding: 3px; padding-left: 24px; padding-right: 24px; } \
+        QPushButton:hover { background-color: palette(highlight); color: palette(highlighted-text); } \
+        QPushButton:disabled { background-color: %6; color: palette(disabled); } \
+        QToolButton { border: none; border-radius: 2px; background-color: palette(button); min-height: 48px; padding: 3px; padding-left: 24px; padding-right: 24px; } \
+        QToolButton:hover { background-color: palette(highlight); color: palette(highlighted-text); } \
+        QToolButton:disabled { background-color: %6; color: palette(disabled); } \
+        QComboBox { border: none; border-radius: 2px; background-color: palette(button); min-height: 32px; padding: 1px 9px 1px 9px; min-width: 6em; } \
+        QComboBox::drop-down { width: 24px; subcontrol-origin: padding; subcontrol-position: top right; border-top-right-radius: 3px; border-bottom-right-radius: 3px; } \
+        QComboBox::down-arrow { image: url(:/images/downArrow%7.png); } \
+        QComboBox QListView::item { height: 32px; } \
+        QGroupBox { border: none; padding: 3px; padding-top: 28px; } \
+        QFrame { border: none; } \
+        QHeaderView::section { height: 22px; background-color: palette(base); border: none; border-right: 1px solid rgba(128, 128, 128, 64); } \
+        QHeaderView::section:last { border-right: none; } \
         QScrollArea { border-top: 2px solid transparent; border-bottom: 2px solid transparent; } \
         QScrollBar:vertical { border: none; width: 2px; padding-top: 8px; } \
         QScrollBar::handle:vertical { background: darkgray; } \
         QScrollBar::add-line:vertical { border: none; background: none; height: 0px; } \
         QScrollBar::sub-line:vertical { border: none; background: none; height: 0px; } \
+        #grpJog QToolButton { min-width: 48px; min-height: 48px; padding: 0px; margin: 0px; } \
+        #grpControl QToolButton { min-width: 48px; min-height: 48px; padding: 0px; margin: 0px; } \
+        #grpUserCommands QToolButton { min-width: 48px; min-height: 48px; padding: 0px; margin: 0px; } \
+        #grpState QLineEdit { font-size: 16pt; } \
         #grpConsole QComboBox { padding: 0px; padding-left: 3px; } \
         #grpConsole QComboBox::drop-down { border: none; width:0px; } \
         #grpConsole QComboBox::down-arrow { border: none; image: none; width:0px; } \
-        #glwVisualizer QToolButton { border: 1px solid palette(button-text); background-color: %1; } \
-        #glwVisualizer QToolButton:hover { border: 1px solid palette(highlight); } \
+        #glwVisualizer QToolButton { padding: 0px; min-width: 48px; min-height: 48px; border: 1px solid palette(button-text); border-radius: 3px; background-color: %1; } \
+        #glwVisualizer QToolButton:hover { background-color: palette(highlight); border: 1px solid palette(highlight); } \
         QSlider::handle { background-color: palette(button); width: 10px; height: 10px; margin: 2px; border-radius: 7px; border: 2px solid  palette(button-text); } \
         QSlider::handle:hover { background-color: %2; border-color: %3;} \
         QSlider::handle:disabled { background-color: %4; border-color: %5; } \
         #tblProgram QScrollBar::handle:vertical { min-width: 8px; min-height: 24px; } \
+        QMessageBox { border: none; background-color: rgba(0,0,0,192); color: palette(text); } \
     ").arg(backgroundColor.name()).arg(sliderHandleHoverColor.name()).arg(sliderHandleBorderHoverColor.name())
-      .arg(sliderHandleDisabledColor.name()).arg(sliderHandleBorderDisabledColor.name()));
+      .arg(sliderHandleDisabledColor.name()).arg(sliderHandleBorderDisabledColor.name()).arg(buttonDisabledColor.name())
+      .arg((m_currentThemeIndex==0) ? "" : "_invert"));
 }
+
+//        QMessageBox QPushButton { border: none; border-radius: 2px; background-color: palette(button); min-height: 48px; padding: 3px; padding-left: 24px; padding-right: 24px; }\
 
 void frmMain::updateParser()
 {
@@ -2531,11 +2628,15 @@ void frmMain::updateParser()
 
 void frmMain::on_cmdCommandSend_clicked()
 {
-    QString command = ui->cboCommand->currentText();
+//    QString command = ui->txtCommand->currentText();
+    QString command = ui->txtCommand->text();
     if (command.isEmpty()) return;
 
-    ui->cboCommand->storeText();
-    ui->cboCommand->setCurrentText("");
+    ui->txtCommand->storeText();
+//    ui->txtCommand->setCurrentText("");
+    ui->txtCommand->setText("");
+//    emit ui->txtCommand->returnPressed();
+
     sendCommand(command, -1);
 }
 
@@ -2935,10 +3036,10 @@ void frmMain::on_grpOverriding_toggled(bool checked)
                                     .arg(ui->slbFeedOverride->isChecked() ? QString::number(ui->slbFeedOverride->value()) : "-")
                                     .arg(ui->slbRapidOverride->isChecked() ? QString::number(ui->slbRapidOverride->value()) : "-")
                                     .arg(ui->slbSpindleOverride->isChecked() ? QString::number(ui->slbSpindleOverride->value()) : "-"));
-    }
-    updateLayouts();
+    }    
 
     ui->widgetFeed->setVisible(checked);
+    updateLayouts();
 }
 
 void frmMain::on_grpSpindle_toggled(bool checked)
@@ -2948,15 +3049,34 @@ void frmMain::on_grpSpindle_toggled(bool checked)
     } else if (ui->cmdSpindle->isChecked()) {
 //        ui->grpSpindle->setTitle(tr("Spindle") + QString(tr(" (%1)")).arg(ui->txtSpindleSpeed->text()));
         ui->grpSpindle->setTitle(tr("Spindle") + QString(tr(" (%1)")).arg(ui->slbSpindle->value()));
-    }
-    updateLayouts();
+    }    
 
     ui->widgetSpindle->setVisible(checked);
+    updateLayouts();
 }
 
 void frmMain::on_grpUserCommands_toggled(bool checked)
 {
     ui->widgetUserCommands->setVisible(checked);
+    updateLayouts();
+}
+
+void frmMain::on_grpControl_toggled(bool checked)
+{
+    ui->widgetControl->setVisible(checked);
+    updateLayouts();
+}
+
+void frmMain::on_grpState_toggled(bool checked)
+{
+    ui->widgetState->setVisible(checked);
+    updateLayouts();
+}
+
+void frmMain::on_grpConsole_toggled(bool checked)
+{
+    ui->widgetConsole->setVisible(checked);
+    updateLayouts();
 }
 
 bool frmMain::eventFilter(QObject *obj, QEvent *event)
@@ -2996,7 +3116,7 @@ bool frmMain::eventFilter(QObject *obj, QEvent *event)
 
             if (!m_processingFile && keyEvent->key() == Qt::Key_ScrollLock && obj == this) {
                 ui->chkKeyboardControl->toggle();
-                if (!ui->chkKeyboardControl->isChecked()) ui->cboCommand->setFocus();
+                if (!ui->chkKeyboardControl->isChecked()) ui->txtCommand->setFocus();
             }
 
             if (!m_processingFile && ui->chkKeyboardControl->isChecked()) {
@@ -3028,7 +3148,7 @@ bool frmMain::eventFilter(QObject *obj, QEvent *event)
         }
 
     // Splitter events
-    } else if (obj == ui->splitPanels && event->type() == QEvent::Resize) {
+    } /*else if (obj == ui->splitPanels && event->type() == QEvent::Resize) {
         // Resize splited widgets
         onPanelsSizeChanged(ui->scrollAreaWidgetContents->sizeHint());
 
@@ -3069,35 +3189,36 @@ bool frmMain::eventFilter(QObject *obj, QEvent *event)
         default:
             break;
         }
-    }
+    }*/
 
     return QMainWindow::eventFilter(obj, event);
 }
 
-int frmMain::getConsoleMinHeight()
-{
-    return ui->grpConsole->height() - ui->grpConsole->contentsRect().height()
-            + ui->spacerConsole->geometry().height() + ui->grpConsole->layout()->margin() * 2
-            + ui->cboCommand->height();
-}
+//int frmMain::getConsoleMinHeight()
+//{
+//    return ui->grpConsole->height() - ui->grpConsole->contentsRect().height()
+////            + ui->spacerConsole->geometry().height()
+//            + ui->grpConsole->layout()->margin() * 2
+//            + ui->txtCommand->height();
+//}
 
-void frmMain::onConsoleResized(QSize size)
-{
-    Q_UNUSED(size)
+//void frmMain::onConsoleResized(QSize size)
+//{
+//    Q_UNUSED(size)
 
-    int minHeight = getConsoleMinHeight();
-    bool visible = ui->grpConsole->height() > minHeight;
-    if (ui->txtConsole->isVisible() != visible) {
-        ui->txtConsole->setVisible(visible);
-    }
-}
+//    int minHeight = getConsoleMinHeight();
+//    bool visible = ui->grpConsole->height() > minHeight;
+//    if (ui->txtConsole->isVisible() != visible) {
+//        ui->txtConsole->setVisible(visible);
+//    }
+//}
 
-void frmMain::onPanelsSizeChanged(QSize size)
-{
-    ui->splitPanels->setSizes(QList<int>() << size.height() + 4
-                              << ui->splitPanels->height() - size.height()
-                              - 4 - ui->splitPanels->handleWidth());
-}
+//void frmMain::onPanelsSizeChanged(QSize size)
+//{
+//    ui->splitPanels->setSizes(QList<int>() << size.height() + 4
+//                              << ui->splitPanels->height() - size.height()
+//                              - 4 - ui->splitPanels->handleWidth());
+//}
 
 bool frmMain::keyIsMovement(int key)
 {
@@ -3209,12 +3330,14 @@ void frmMain::onActRecentFileTriggered()
     }
 }
 
-void frmMain::onCboCommandReturnPressed()
+void frmMain::ontxtCommandReturnPressed()
 {
-    QString command = ui->cboCommand->currentText();
+//    QString command = ui->txtCommand->currentText();
+    QString command = ui->txtCommand->text();
     if (command.isEmpty()) return;
 
-    ui->cboCommand->setCurrentText("");
+//    ui->txtCommand->setCurrentText("");
+    ui->txtCommand->setText("");
     sendCommand(command, -1);
 }
 
@@ -3247,9 +3370,9 @@ double frmMain::toMetric(double value)
     return m_settings->units() == 0 ? value : value * 25.4;
 }
 
-void frmMain::on_grpHeightMap_toggled(bool arg1)
+void frmMain::on_grpHeightMap_toggled(bool checked)
 {
-    ui->widgetHeightMap->setVisible(arg1);
+    ui->widgetHeightMap->setVisible(checked);
 }
 
 QRectF frmMain::borderRectFromTextboxes()
@@ -3306,7 +3429,7 @@ bool frmMain::updateHeightMapGrid()
                 nan = false;
                 break;
             }
-    if (!nan && QMessageBox::warning(this, this->windowTitle(), tr("Changing grid settings will reset probe data. Continue?"),
+    if (!nan && MessageBox::warning(this, this->windowTitle(), tr("Changing grid settings will reset probe data. Continue?"),
                                                            QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) return false;
 
     // Update grid drawer
@@ -3570,7 +3693,7 @@ void frmMain::loadHeightMap(QString fileName)
     QFile file(fileName);
 
     if (!file.open(QIODevice::ReadOnly)) {
-        QMessageBox::critical(this, this->windowTitle(), tr("Can't open file:\n") + fileName);
+        MessageBox::critical(this, this->windowTitle(), tr("Can't open file:\n") + fileName);
         return;
     }
     QTextStream textStream(&file);
@@ -4176,70 +4299,70 @@ void frmMain::on_actDark_triggered()
 void frmMain::on_GamepadStateChanged()
 {
     if (!m_processingFile) {
-        m_jogVector = QVector3D(m_gamepad.x, m_gamepad.y, m_gamepad.r);
+        m_jogVector = QVector3D(m_gamepad.x, m_gamepad.y, m_gamepad.z);
 
-        if (m_gamepad.z < -0.9) {
+        if (m_gamepad.r < -0.9) {
             ui->cboJogFeed->setCurrentPrevious();
         }
 
-        if (m_gamepad.z > 0.9) {
+        if (m_gamepad.r > 0.9) {
             ui->cboJogFeed->setCurrentNext();
         }
 
         jogStep();
 
-        // Select button pressed
-        if (m_gamepad.button == 256) {
-            emit ui->cmdZeroXY->clicked();
-            emit ui->cmdZeroZ->clicked();
-        }
+//        // Select button pressed
+//        if (m_gamepad.button == 256) {
+//            emit ui->cmdZeroXY->clicked();
+//            emit ui->cmdZeroZ->clicked();
+//        }
 
-        // Start button pressed
-        if (m_gamepad.button == 512) {
-            emit ui->cmdFileSend->clicked();
-        }
+//        // Start button pressed
+//        if (m_gamepad.button == 512) {
+//            emit ui->cmdFileSend->clicked();
+//        }
 
-        // Button 1 pressed
-        if (m_gamepad.button == 1) {
-            emit ui->cmdUser0->clicked(true);
-        }
+//        // Button 1 pressed
+//        if (m_gamepad.button == 1) {
+//            emit ui->cmdUser0->clicked(true);
+//        }
 
-        // Button 2 pressed
-        if (m_gamepad.button == 2) {
-            emit ui->cmdUser1->clicked(true);
-        }
+//        // Button 2 pressed
+//        if (m_gamepad.button == 2) {
+//            emit ui->cmdUser1->clicked(true);
+//        }
 
-        // Button 3 pressed
-        if (m_gamepad.button == 4) {
-            emit ui->cmdUser2->clicked(true);
-        }
+//        // Button 3 pressed
+//        if (m_gamepad.button == 4) {
+//            emit ui->cmdUser2->clicked(true);
+//        }
 
-        // Button 4 pressed
-        if (m_gamepad.button == 8) {
-            emit ui->cmdUser3->clicked(true);
-        }
+//        // Button 4 pressed
+//        if (m_gamepad.button == 8) {
+//            emit ui->cmdUser3->clicked(true);
+//        }
 
-        // Button l1 pressed
-        if (m_gamepad.button == 16) {
-            emit ui->cmdReset->clicked(true);
-        }
+//        // Button l1 pressed
+//        if (m_gamepad.button == 16) {
+//            emit ui->cmdReset->clicked(true);
+//        }
 
-        // Button r1 pressed
-        if (m_gamepad.button == 32) {
-            emit ui->cmdUnlock->clicked(true);
-        }
+//        // Button r1 pressed
+//        if (m_gamepad.button == 32) {
+//            emit ui->cmdUnlock->clicked(true);
+//        }
 
-        // Button l2 pressed
-        if (m_gamepad.button == 64) {
-            emit ui->cmdHome->clicked(true);
-        }
+//        // Button l2 pressed
+//        if (m_gamepad.button == 64) {
+//            emit ui->cmdHome->clicked(true);
+//        }
 
-        // Button r2 pressed
-        if (m_gamepad.button == 128) {
-            emit ui->cmdHome->clicked(true);
-        }
+//        // Button r2 pressed
+//        if (m_gamepad.button == 128) {
+//            emit ui->cmdHome->clicked(true);
+//        }
 
-    }else {
+    }/*else {
         // Select button pressed
         if (m_gamepad.button == 256) {
             emit ui->cmdFileAbort->clicked();
@@ -4252,7 +4375,7 @@ void frmMain::on_GamepadStateChanged()
             emit ui->cmdFilePause->clicked(!ui->cmdFilePause->isChecked());
         }
 
-    }
+    }*/
 }
 
 void frmMain::on_GamepadZeroState()
@@ -4263,3 +4386,5 @@ void frmMain::on_GamepadZeroState()
         jogStep();
     }
 }
+
+

@@ -13,7 +13,7 @@ frmSettings::frmSettings(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::frmSettings)
 {
-    ui->setupUi(this);
+    ui->setupUi(this);    
 
     this->setLocale(QLocale::C);
     m_intValidator.setBottom(1);
@@ -66,6 +66,7 @@ int frmSettings::exec()
     }
 
     ui->cmdRefresh->setIcon(QIcon(":/images/reset.png"));
+    ui->cmdRefresh->setFixedHeight(ui->cboPort->sizeHint().height());
     QColor buttonTextColor = palette().color(QPalette::ButtonText);
     Util::changeButtonIconColor(ui->cmdRefresh, buttonTextColor);
 
@@ -459,9 +460,39 @@ bool frmSettings::panelUserCommands()
     return ui->chkPanelUserCommands->isChecked();
 }
 
+bool frmSettings::panelControl()
+{
+    return ui->chkPanelControl->isChecked();
+}
+
+bool frmSettings::panelConsole()
+{
+    return ui->chkPanelConsole->isChecked();
+}
+
+bool frmSettings::panelState()
+{
+    return ui->chkPanelState->isChecked();
+}
+
 void frmSettings::setPanelUserCommands(bool value)
 {
     ui->chkPanelUserCommands->setChecked(value);
+}
+
+void frmSettings::setPanelControl(bool value)
+{
+    ui->chkPanelControl->setChecked(value);
+}
+
+void frmSettings::setPanelConsole(bool value)
+{
+    ui->chkPanelConsole->setChecked(value);
+}
+
+void frmSettings::setPanelState(bool value)
+{
+    ui->chkPanelState->setChecked(value);
 }
 
 bool frmSettings::panelHeightmap()

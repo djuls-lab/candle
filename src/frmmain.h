@@ -4,6 +4,7 @@
 #ifndef FRMMAIN_H
 #define FRMMAIN_H
 
+#include <QApplication>
 #include <QMainWindow>
 #include <QtSerialPort/QSerialPort>
 #include <QSettings>
@@ -35,7 +36,6 @@
 
 #include "utils/interpolation.h"
 
-#include "widgets/styledtoolbutton.h"
 #include "widgets/sliderbox.h"
 
 #include "frmsettings.h"
@@ -102,10 +102,10 @@ private slots:
     void onTableInsertLine();
     void onTableDeleteLines();
     void onActRecentFileTriggered();
-    void onCboCommandReturnPressed();
+    void ontxtCommandReturnPressed();
     void onTableCurrentChanged(QModelIndex idx1, QModelIndex idx2);
-    void onConsoleResized(QSize size);
-    void onPanelsSizeChanged(QSize size);
+//    void onConsoleResized(QSize size);
+//    void onPanelsSizeChanged(QSize size);
     void onCmdUserClicked(bool checked);
     void onOverridingToggled(bool checked);
     void onActSendFromLineTriggered();
@@ -144,6 +144,9 @@ private slots:
     void on_grpSpindle_toggled(bool checked);
     void on_grpJog_toggled(bool checked);
     void on_grpUserCommands_toggled(bool checked);
+    void on_grpControl_toggled(bool checked);    
+    void on_grpState_toggled(bool checked);
+    void on_grpConsole_toggled(bool checked);
     void on_chkKeyboardControl_toggled(bool checked);
     void on_tblProgram_customContextMenuRequested(const QPoint &pos);
     void on_splitter_splitterMoved(int pos, int index);
@@ -390,7 +393,7 @@ private:
     bool isGCodeFile(QString fileName);
     bool isHeightmapFile(QString fileName);
     bool compareCoordinates(double x, double y, double z);
-    int getConsoleMinHeight();
+//    int getConsoleMinHeight();
     void updateOverride(SliderBox *slider, int value, char command);
     void jogStep();
     void updateJogTitle();

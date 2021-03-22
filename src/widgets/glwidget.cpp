@@ -22,11 +22,18 @@ GLWidget::GLWidget(QWidget *parent) : QGLWidget(parent), m_shaderProgram(0)
 #endif
 
 {
+    setAttribute(Qt::WA_AcceptTouchEvents);
+    grabGesture(Qt::SwipeGesture);
+    grabGesture(Qt::PanGesture);
+    grabGesture(Qt::PinchGesture);
+
     m_animateView = false;
     m_updatesEnabled = false;
 
     m_xRot = 90;
     m_yRot = 0;
+
+//    m_angle = 0;
 
     m_xRotTarget = 90;
     m_yRotTarget = 0;
@@ -411,6 +418,8 @@ void GLWidget::updateView()
     m_viewMatrix.translate(-m_xLookAt, -m_yLookAt, -m_zLookAt);
 
     m_viewMatrix.rotate(-90, 1.0, 0.0, 0.0);
+
+//    m_viewMatrix.rotate(m_angle, 0.0, 0.0, 1.0);
 }
 
 #ifdef GLES
@@ -518,6 +527,10 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
     m_yLastRot = m_yRot;
     m_xLastPan = m_xPan;
     m_yLastPan = m_yPan;
+    m_lastZoom = m_zoom;
+//    m_lastAngle = m_angle;
+
+//    this->setFocus(); // TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 }
 
 void GLWidget::mouseMoveEvent(QMouseEvent *event)
@@ -544,6 +557,11 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
     }
 }
 
+void GLWidget::mouseReleaseEvent(QMouseEvent *event)
+{
+
+}
+
 void GLWidget::wheelEvent(QWheelEvent *we)
 {
     if (m_zoom > 0.1 && we->delta() < 0) {
@@ -563,6 +581,377 @@ void GLWidget::wheelEvent(QWheelEvent *we)
     updateProjection();
     updateView();
 }
+
+void GLWidget::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    fitDrawable();
+}
+
+//void GLWidget::touchEvent(QTouchEvent *te)
+//{
+//    // https://doc.qt.io/archives/qt-4.8/qt-touch-pinchzoom-graphicsview-cpp.html
+//    QList<QTouchEvent::TouchPoint> touchPoints = te->touchPoints();
+
+//    m_parserStatus = QString("touched !!! %i point(s)").arg(touchPoints.count()); // TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+//    if (touchPoints.count() == 2) {
+//        // determine scale factor
+//        const QTouchEvent::TouchPoint &touchPoint0 = touchPoints.first();
+//        const QTouchEvent::TouchPoint &touchPoint1 = touchPoints.last();
+//        qreal currentScaleFactor =
+//                QLineF(touchPoint0.pos(), touchPoint1.pos()).length()
+//                / QLineF(touchPoint0.startPos(), touchPoint1.startPos()).length();
+//        if (te->touchPointStates() & Qt::TouchPointReleased) {
+//            // if one of the fingers is released, remember the current scale
+//            // factor so that adding another finger later will continue zooming
+//            // by adding new scale factor to the existing remembered value.
+//            m_zoom *= currentScaleFactor;
+//            currentScaleFactor = 1;
+//        }
+//    }
+
+//    updateProjection();
+//    updateView();
+//}
+
+
+QVector2D GLWidget::getPanVector()
+{
+    if (m_touchPoints.count() != 1)
+    {
+        return QVector2D();
+    }
+
+    return QVector2D(m_touchPoints.first().pos() - m_touchPoints.first().startPos());
+}
+
+float GLWidget::getPinchScaleRatio()
+{
+    if (m_touchPoints.count() != 2)
+    {
+        return 0.0f;
+    }
+
+    const QTouchEvent::TouchPoint &touchPointA = m_touchPoints.first();
+    const QTouchEvent::TouchPoint &touchPointB = m_touchPoints.last();
+    float currPointDistance = QLineF(touchPointA.pos(), touchPointB.pos()).length();
+    float prevPointDistance = QLineF(touchPointA.startPos(), touchPointB.startPos()).length();
+    return (currPointDistance == 0.0f) ? 0.0f : prevPointDistance / currPointDistance;
+
+}
+
+QVector2D GLWidget::getPinchCenterMovementVector()
+{
+    if (m_touchPoints.count() != 2)
+    {
+        return QVector2D();
+    }
+
+    const QTouchEvent::TouchPoint &touchPointA = m_touchPoints.first();
+    const QTouchEvent::TouchPoint &touchPointB = m_touchPoints.last();
+    QVector2D curr2Center = QVector2D(touchPointA.pos() + touchPointB.pos());
+    QVector2D prev2Center = QVector2D(touchPointA.startPos() + touchPointB.startPos());
+    return (curr2Center - prev2Center) / 2.0f;
+}
+
+QPointF GLWidget::getPinchCenterPoint()
+{
+    if (m_touchPoints.count() != 2)
+    {
+        return QPointF();
+    }
+
+    const QTouchEvent::TouchPoint &touchPointA = m_touchPoints.first();
+    const QTouchEvent::TouchPoint &touchPointB = m_touchPoints.last();
+    return (touchPointA.pos() + touchPointB.pos()) / 2.0f;
+}
+
+float GLWidget::getPinchRotationAngle()
+{
+    if (m_touchPoints.count() != 2)
+    {
+        return 0.0f;
+    }
+
+    const QTouchEvent::TouchPoint &touchPointA = m_touchPoints.first();
+    const QTouchEvent::TouchPoint &touchPointB = m_touchPoints.last();
+    QVector2D currDirection = QVector2D(touchPointA.pos() - touchPointB.pos());
+    QVector2D prevDirection = QVector2D(touchPointA.startPos() - touchPointB.startPos());
+
+    //Compute the difference in angles
+    float dotProduct = QVector2D::dotProduct(currDirection, prevDirection);
+    float crossProduct = currDirection.x() * prevDirection.y() - currDirection.y() * prevDirection.x();
+    float angle = qAtan2(crossProduct, dotProduct);
+
+    //To degree
+    angle *= 180.0f / M_PI;
+
+    //qDebug() << "Rotate angle : " << angle;
+
+    return angle;
+}
+
+
+bool GLWidget::event(QEvent *event)
+{
+//    if (event->type() == QEvent::Gesture)
+//        return gestureEvent(static_cast<QGestureEvent*>(event));
+//    return GLWidget::event(event);
+
+//    if(event->type() == QEvent::TouchBegin ||
+//            event->type() == QEvent::TouchUpdate ||
+//            event->type() == QEvent::TouchEnd ){
+//    if(event->type() == QEvent::TouchBegin){
+//        QTouchEvent *touchEvent = static_cast<QTouchEvent *>(event);
+//        QList<QTouchEvent::TouchPoint> touchPoints = touchEvent->touchPoints();
+
+//        if (touchPoints.count() == 2) {
+////            const QTouchEvent::TouchPoint &touchPoint0 = touchPoints.first();
+////            const QTouchEvent::TouchPoint &touchPoint1 = touchPoints.last();
+
+//            m_lastZoom = m_zoom;
+////            m_lastLength = QLineF(touchPoint0.pos(), touchPoint1.pos()).length();
+////            m_xLastRot = m_xRot;
+////            m_yLastRot = m_yRot;
+////            m_xLastPan = m_xPan;
+////            m_yLastPan = m_yPan;
+//        }
+//    }
+
+//    else if(event->type() == QEvent::TouchUpdate){
+
+//    if(event->type() == QEvent::TouchBegin ||
+//        event->type() == QEvent::TouchUpdate ||
+//        event->type() == QEvent::TouchEnd ){
+//        QTouchEvent *touchEvent = static_cast<QTouchEvent *>(event);
+//        m_touchPoints = touchEvent->touchPoints();
+//    }
+
+    if(event->type() == QEvent::TouchUpdate){
+        QTouchEvent *touchEvent = static_cast<QTouchEvent *>(event);
+        m_touchPoints = touchEvent->touchPoints();
+
+//        QTouchEvent *touchEvent = static_cast<QTouchEvent *>(event);
+////        QList<QTouchEvent::TouchPoint> touchPoints = touchEvent->touchPoints();
+//        m_touchPoints = touchEvent->touchPoints();
+
+        //if(touchPoints.count() == 1 && touchEvent->touchPointStates().testFlag(Qt::TouchPointReleased))
+        //    _release2touch = false;
+
+//        if (touchPoints.count() == 1 && !m_release2touch)
+//        {
+//            switch (event->type()) {
+//            case QEvent::TouchBegin:
+//            {
+//                QTouchEvent *touchEvent = static_cast<QTouchEvent *>(event);
+//                QTouchEvent::TouchPoint touchPoints = touchEvent->touchPoints().first();
+//                QMouseEvent *e = new QMouseEvent(QEvent::MouseButtonPress,
+//                                                 touchPoints.pos(), Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
+
+//                mousePressEvent(e); // ==> meilleure methode
+//            }break;
+
+//            case QEvent::TouchUpdate:
+//            {
+//                QTouchEvent *touchEvent = static_cast<QTouchEvent *>(event);
+//                QTouchEvent::TouchPoint touchPoints = touchEvent->touchPoints().first();
+//                QMouseEvent *e = new QMouseEvent(QEvent::MouseMove,
+//                                                 touchPoints.pos(), Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
+
+//                mouseMoveEvent(e);
+//            }break;
+
+//            case QEvent::TouchEnd:{
+//                QTouchEvent *touchEvent = static_cast<QTouchEvent *>(event);
+//                QTouchEvent::TouchPoint touchPoints = touchEvent->touchPoints().first();
+//                QMouseEvent *e = new QMouseEvent(QEvent::MouseButtonRelease,
+//                                                 touchPoints.pos(), Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
+
+//                mouseReleaseEvent(e);
+//            }break;
+
+//            default:
+//                break;
+//            }
+//        }else if (touchPoints.count() == 2) {
+//        if (m_touchPoints.count() == 2) {
+////            m_release2touch = true;
+//            // determine scale factor
+//            const QTouchEvent::TouchPoint &touchPoint0 = m_touchPoints.first();
+//            const QTouchEvent::TouchPoint &touchPoint1 = m_touchPoints.last();
+//            qreal currentScaleFactor =
+//                    QLineF(touchPoint0.pos(), touchPoint1.pos()).length()
+//                    / QLineF(touchPoint0.startPos(), touchPoint1.startPos()).length();
+//            QTouchEvent *touchEvent = static_cast<QTouchEvent *>(event);
+//            if (touchEvent->touchPointStates() & Qt::TouchPointReleased) {
+//                // if one of the fingers is released, remember the current scale
+//                // factor so that adding another finger later will continue zooming
+//                // by adding new scale factor to the existing remembered value.
+//                m_zoom *= currentScaleFactor;
+//                currentScaleFactor = 1;
+//            }
+//            m_zoom *= QLineF(touchPoint0.pos(), touchPoint1.pos()).length()
+//                    / QLineF(touchPoint0.startPos(), touchPoint1.startPos()).length();
+
+
+//            stopViewAnimation();
+
+            // rotation
+
+//            m_yRot = normalizeAngle(m_yLastRot - (touchPoint0.pos().x() - touchPoint1.pos().x()) * 0.5);
+//            m_xRot = m_xLastRot + (touchPoint0.pos().y() - touchPoint1.pos().y()) * 0.5;
+
+//            if (m_xRot < -90) m_xRot = -90;
+//            if (m_xRot > 90) m_xRot = 90;
+
+
+            // zoom and pan
+
+//            qreal delta = QLineF(touchPoint0.pos(), touchPoint1.pos()).length() - QLineF(touchPoint0.startPos(), touchPoint1.startPos()).length();
+////            qreal delta = QLineF(touchPoint0.pos(), touchPoint1.pos()).length() / m_lastLength;
+////            m_zoom = m_lastZoom * QLineF(touchPoint0.pos(), touchPoint1.pos()).length()
+////                    / QLineF(touchPoint0.startPos(), touchPoint1.startPos()).length();
+
+//            if (m_zoom > 0.1 && delta < 0) {
+////            if (m_zoom > 0.1 && m_zoom < 10) {
+//                m_xPan -= ((double)(touchPoint0.startPos().x() + touchPoint1.startPos().x()) / 2.0 / width() - 0.5 + m_xPan) * (1 - 1 / ZOOMSTEP);
+//                m_yPan += ((double)(touchPoint0.startPos().y() + touchPoint1.startPos().y()) / 2.0 / height() - 0.5 - m_yPan) * (1 - 1 / ZOOMSTEP);
+
+//                m_zoom /= ZOOMSTEP;
+////                m_zoom *= delta;
+//            }
+
+////            qreal delta = QLineF(touchPoint0.pos(), touchPoint1.pos()).length() - QLineF(touchPoint0.startPos(), touchPoint1.startPos()).length();
+
+////            if (m_zoom > 0.1 && delta < 0) {
+////                m_xPan -= ((double)(touchPoint0.pos().x() + touchPoint1.pos().x()) / 2.0 / width() - 0.5 + m_xPan) * (1 - 1 / ZOOMSTEP);
+////                m_yPan += ((double)(touchPoint0.pos().y() + touchPoint1.pos().y()) / 2.0 / height() - 0.5 - m_yPan) * (1 - 1 / ZOOMSTEP);
+
+////                m_zoom /= ZOOMSTEP;
+////            }
+//            else if (m_zoom < 10 && delta > 0)
+//            {
+//                m_xPan -= ((double)(touchPoint0.startPos().x() + touchPoint1.startPos().x()) / 2.0 / width() - 0.5 + m_xPan) * (1 - ZOOMSTEP);
+//                m_yPan += ((double)(touchPoint0.startPos().y() + touchPoint1.startPos().y()) / 2.0 / height() - 0.5 - m_yPan) * (1 - ZOOMSTEP);
+
+//                m_zoom *= ZOOMSTEP;
+//            }
+
+            // pan
+
+//            m_xPan = m_xLastPan - ((touchPoint0.pos().x() + touchPoint1.pos().x()) / 2.0 - m_lastPos.x()) * 1 / (double)width();
+//            m_yPan = m_yLastPan + ((touchPoint0.pos().y() + touchPoint1.pos().y()) / 2.0 - m_lastPos.y()) * 1 / (double)height();
+
+////            m_zoom *= QLineF(touchPoint0.pos(), touchPoint1.pos()).length()
+////                / QLineF(touchPoint0.startPos(), touchPoint1.startPos()).length();
+
+//            m_zoom = m_lastZoom * QLineF(touchPoint0.pos(), touchPoint1.pos()).length()
+//                / QLineF(touchPoint0.startPos(), touchPoint1.startPos()).length();
+
+//            updateProjection();
+//            updateView();
+//            emit rotationChanged();
+
+//            QPointF pos = (touchPoint0.pos() + touchPoint1.pos()) / 2.0;
+//            qreal delta = QLineF(touchPoint0.pos(), touchPoint1.pos()).length() - QLineF(touchPoint0.startPos(), touchPoint1.startPos()).length();
+//            QWheelEvent *we = new QWheelEvent(pos, delta, Qt::LeftButton, Qt::NoModifier);
+
+//            wheelEvent(we);
+//      }        
+
+
+//        QPointF pinchCenterPoint = getPinchCenterPoint();
+
+//        stopViewAnimation();
+
+////        m_yRot = m_xLastRot + (pinchCenterMovementVector.x() - m_lastPos.x()) * 0.5;
+////        m_xRot = normalizeAngle(m_yLastRot - (pinchCenterMovementVector.y() - m_lastPos.y()) * 0.5);
+
+////        if (m_xRot < -90) m_xRot = -90;
+////        if (m_xRot > 90) m_xRot = 90;
+
+//        //This is the rotation axis the user want, perpendicular to the screen
+////        QVector3D rotationAxis = QVector3D(0.0f, 0.0f, 1.0f);
+////        m_angle = m_lastAngle + getPinchRotationAngle();
+//        m_yRot = normalizeAngle(m_yLastRot - (pinchCenterPoint.x()) * 0.5);
+//        m_xRot = m_xLastRot + (pinchCenterPoint.y()) * 0.5;
+
+//        if (m_xRot < -90) m_xRot = -90;
+//        if (m_xRot > 90) m_xRot = 90;
+
+//        //Now we apply the rotation
+////        QQuaternion rotation = QQuaternion::fromAxisAndAngle(rotationAxis.normalized(), angle) * m_viewData.rotation;
+
+//        updateView();
+//        emit rotationChanged();
+
+        QVector2D pinchCenterMovementVector = getPinchCenterMovementVector();
+        m_xPan = m_xLastPan - pinchCenterMovementVector.x() * 1 / (double)width();
+        m_yPan = m_yLastPan + pinchCenterMovementVector.y() * 1 / (double)height();
+
+        updateProjection();
+
+        float pinchScaleRatio = getPinchScaleRatio();
+        m_zoom = m_lastZoom / pinchScaleRatio;
+
+        updateProjection();
+        updateView();
+
+        return true;
+    }
+
+    return QWidget::event(event);
+}
+
+
+//bool GLWidget::gestureEvent(QGestureEvent *event)
+//{
+//    if (QGesture *swipe = event->gesture(Qt::SwipeGesture))
+//        swipeTriggered(static_cast<QSwipeGesture *>(swipe));
+//    else if (QGesture *pan = event->gesture(Qt::PanGesture))
+//        panTriggered(static_cast<QPanGesture *>(pan));
+//    if (QGesture *pinch = event->gesture(Qt::PinchGesture))
+//        pinchTriggered(static_cast<QPinchGesture *>(pinch));
+//    return true;
+//}
+
+//void GLWidget::swipeTriggered(QSwipeGesture *gesture)
+//{
+//    qDebug() << gesture;
+//    m_zoom *= ZOOMSTEP;
+//    updateProjection();
+//    updateView();
+//}
+
+//void GLWidget::panTriggered(QPanGesture *gesture)
+//{
+//    qDebug() << gesture;
+//    m_zoom *= ZOOMSTEP;
+//    updateProjection();
+//    updateView();
+//}
+
+//void GLWidget::pinchTriggered(QPinchGesture *gesture)
+//{
+//    qDebug() << gesture;
+//    m_zoom *= ZOOMSTEP;
+//    updateProjection();
+//    updateView();
+////      QPinchGesture::ChangeFlags changeFlags = gesture->changeFlags();
+////      if (changeFlags & QPinchGesture::RotationAngleChanged) {
+////            qreal rotationDelta = gesture->rotationAngle() - gesture->lastRotationAngle();
+////            rotationAngle += rotationDelta;
+////      }
+////      if (changeFlags & QPinchGesture::ScaleFactorChanged) {
+////            currentStepScaleFactor = gesture->totalScaleFactor();
+////      }
+////      if (gesture->state() == Qt::GestureFinished) {
+////            scaleFactor *= currentStepScaleFactor;
+////            currentStepScaleFactor = 1;
+////      }
+////      update();
+//}
+
 
 void GLWidget::timerEvent(QTimerEvent *te)
 {

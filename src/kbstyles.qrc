@@ -1,0 +1,17 @@
+<RCC>
+    <qresource prefix="/">
+        <file>styles/QtQuick/VirtualKeyboard/blue/style.qml</file>
+        <file>styles/QtQuick/VirtualKeyboard/blue/images/backspace-868482.svg</file>
+        <file>styles/QtQuick/VirtualKeyboard/blue/images/check-868482.svg</file>
+        <file>styles/QtQuick/VirtualKeyboard/blue/images/enter-868482.svg</file>
+        <file>styles/QtQuick/VirtualKeyboard/blue/images/globe-868482.svg</file>
+        <file>styles/QtQuick/VirtualKeyboard/blue/images/handwriting-868482.svg</file>
+        <file>styles/QtQuick/VirtualKeyboard/blue/images/hidekeyboard-868482.svg</file>
+        <file>styles/QtQuick/VirtualKeyboard/blue/images/search-868482.svg</file>
+        <file>styles/QtQuick/VirtualKeyboard/blue/images/selectionhandle-bottom.svg</file>
+        <file>styles/QtQuick/VirtualKeyboard/blue/images/shift-80c342.svg</file>
+        <file>styles/QtQuick/VirtualKeyboard/blue/images/shift-868482.svg</file>
+        <file>styles/QtQuick/VirtualKeyboard/blue/images/shift-c5d6b6.svg</file>
+        <file>styles/QtQuick/VirtualKeyboard/blue/images/textmode-868482.svg</file>
+    </qresource>
+</RCC>

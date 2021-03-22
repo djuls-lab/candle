@@ -5,12 +5,14 @@
 #define STYLEDTOOLBUTTON_H
 
 #include <QWidget>
-#include <QAbstractButton>
+//#include <QAbstractButton>
 #include <QPainter>
 #include <QStyle>
 #include <QStyleOptionFrame>
+#include <QToolButton>
 
-class StyledToolButton : public QAbstractButton
+//class StyledToolButton : public QAbstractButton
+class StyledToolButton : public QToolButton
 {
 public:
     explicit StyledToolButton(QWidget *parent = 0);

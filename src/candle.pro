@@ -20,6 +20,23 @@ unix:!macx {
     QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN/libs\'"
 }
 
+QT += gamepad
+
+#static {  # TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#    QT += svg  # TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#    # QT += qml  # TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#    QTPLUGIN += qtvirtualkeyboardplugin  # TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#}  # TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#disable-xcb {  # TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#    message("The disable-xcb option has been deprecated. Please use disable-desktop instead.")  # TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#    CONFIG += disable-desktop  # TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#}  # TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#CONFIG += link_pkgconfig  # TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+CONFIG += disable-desktop  # TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
 contains(QT_CONFIG, opengles.) {
     warning("GL ES detected. VAO will be disabled.")
     DEFINES += GLES
@@ -56,17 +73,18 @@ SOURCES += main.cpp\
     parser/pointsegment.cpp \
     tables/gcodetablemodel.cpp \
     tables/heightmaptablemodel.cpp \
+    utils/keyboard.cpp \
     widgets/colorpicker.cpp \
     widgets/combobox.cpp \
     widgets/groupbox.cpp \
+    widgets/lineedit.cpp \
+    widgets/messagebox.cpp \
     widgets/scrollarea.cpp \
-    widgets/styledtoolbutton.cpp \
     widgets/widget.cpp \
     widgets/glwidget.cpp \
     widgets/slider.cpp \
     widgets/sliderbox.cpp \
     drawers/selectiondrawer.cpp \
-    widgets/comboboxkey.cpp \
     utils/gamepad.cpp
 
 HEADERS  += frmmain.h \
@@ -88,21 +106,22 @@ HEADERS  += frmmain.h \
     tables/gcodetablemodel.h \
     tables/heightmaptablemodel.h \
     utils/interpolation.h \
+    utils/keyboard.h \
     utils/util.h \
     widgets/colorpicker.h \
     widgets/combobox.h \
     widgets/groupbox.h \
+    widgets/lineedit.h \
+    widgets/messagebox.h \
     widgets/scrollarea.h \
-    widgets/styledtoolbutton.h \
     widgets/widget.h \
     widgets/glwidget.h \
     widgets/slider.h \
     widgets/sliderbox.h \
     drawers/selectiondrawer.h \
-    widgets/comboboxkey.h \
     utils/gamepad.h
 
-FORMS    += frmmain.ui \
+FORMS += frmmain.ui \
     frmsettings.ui \
     frmabout.ui \
     widgets/sliderbox.ui
@@ -111,6 +130,9 @@ DEFINES += _USE_MATH_DEFINES
 
 RESOURCES += \
     shaders.qrc \
-    images.qrc
+    images.qrc # \
+    # keyboard.qrc\
+    # kbstyles.qrc
 
 CONFIG += c++11
+#CONFIG += console

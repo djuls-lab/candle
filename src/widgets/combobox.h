@@ -1,26 +1,30 @@
-// This file is a part of "Candle" application.
-// Copyright 2015-2016 Hayrullin Denis Ravilevich
-
-#ifndef COMBOBOX_H
-#define COMBOBOX_H
+#ifndef COMBOBOXKEY_H
+#define COMBOBOXKEY_H
 
 #include <QWidget>
 #include <QComboBox>
+#include <QKeyEvent>
+#include <QDebug>
 
 class ComboBox : public QComboBox
 {
-    Q_OBJECT
 public:
     explicit ComboBox(QWidget *parent = 0);
-    ~ComboBox();
 
-    void storeText();
+    void setEditable(bool editable);
 
-signals:
-    void returnPressed();
+    void setCurrentNext();
+    void setCurrentPrevious();
+
+    void setItems(QStringList items);
+    QStringList items();
 
 protected:
     void keyPressEvent(QKeyEvent *e);
+    void keyReleaseEvent(QKeyEvent *e);
+
+private:
+    bool isBlockedKey(int key);
 };
 
-#endif // COMBOBOX_H
+#endif // COMBOBOXKEY_H

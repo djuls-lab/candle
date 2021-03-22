@@ -4,9 +4,13 @@
 #include "styledtoolbutton.h"
 #include <QDebug>
 #include <QEvent>
+#include <QToolButton>
 
-StyledToolButton::StyledToolButton(QWidget *parent) : QAbstractButton(parent)
+//StyledToolButton::StyledToolButton(QWidget *parent) : QAbstractButton(parent)
+StyledToolButton::StyledToolButton(QWidget *parent) : QToolButton(parent)
 {
+    setIconSize(QSize(32, 32));
+
     m_hovered = false;
     m_backColor = palette().color(QPalette::Button);
     m_foreColor = palette().color(QPalette::ButtonText);
@@ -34,78 +38,81 @@ void StyledToolButton::leaveEvent(QEvent *e)
 
 void StyledToolButton::paintEvent(QPaintEvent *e)
 {
+//    static_cast<StyledToolButton*>(parent())->paintEvent(e); // TEMP !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
     Q_UNUSED(e)
 
-    const int borderWidth = 4;
-    const int borderRadius = 5;
+    const int borderWidth = 0; // 4;
+    const int borderRadius = 2; // 5;
 
     QPainter painter(this);
 
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setRenderHint(QPainter::HighQualityAntialiasing);
 
-    // Highlight
-    QPen highlightPen;
+//    // Highlight
+//    QPen highlightPen;
 
-    if ((!this->isEnabled() && !this->isChecked()) || (!this->isDown() && !this->isChecked() && !this->isHover())) {
-        highlightPen.setColor(palette().color(QPalette::Button).lighter());
-    } else if (this->isDown() || this->isChecked()) {
-        highlightPen.setColor(m_highlightColor);
-    } else if (this->isHover()) {
-        highlightPen.setColor(m_highlightColor.lighter(120));
-    }
+//    if ((!this->isEnabled() && !this->isChecked()) || (!this->isDown() && !this->isChecked() && !this->isHover())) {
+//        highlightPen.setColor(palette().color(QPalette::Button).lighter());
+//    } else if (this->isDown() || this->isChecked()) {
+//        highlightPen.setColor(m_highlightColor);
+//    } else if (this->isHover()) {
+//        highlightPen.setColor(m_highlightColor.lighter(120));
+//    }
 
-    highlightPen.setWidth(2);
-    painter.setPen(highlightPen);
-    painter.drawRoundedRect(1, 1, this->width() - 2, this->height() - 2, borderRadius - 1, borderRadius - 1);
+//    highlightPen.setWidth(2);
+//    painter.setPen(highlightPen);
+//    painter.drawRoundedRect(1, 1, this->width() - 2, this->height() - 2, borderRadius - 1, borderRadius - 1);
 
-    // Border
-//    QPen pen(this->isEnabled() ? palette().color(QPalette::Shadow) : palette().color(QPalette::Mid));
+//    // Border
+////    QPen pen(this->isEnabled() ? palette().color(QPalette::Shadow) : palette().color(QPalette::Mid));
 
-//    if ((this->isDown() || this->isChecked()) && this->isEnabled()) pen.setColor(Qt::black);
-    QPen pen(this->isEnabled() ? palette().color(QPalette::ButtonText) : palette().color(QPalette::Disabled, QPalette::ButtonText));
+////    if ((this->isDown() || this->isChecked()) && this->isEnabled()) pen.setColor(Qt::black);
+//    QPen pen(this->isEnabled() ? palette().color(QPalette::ButtonText) : palette().color(QPalette::Disabled, QPalette::ButtonText));
 
-    if ((this->isDown() || this->isChecked()) && this->isEnabled()) pen.setColor(palette().color(QPalette::HighlightedText));
+//    if ((this->isDown() || this->isChecked()) && this->isEnabled()) pen.setColor(palette().color(QPalette::HighlightedText));
 
-    pen.setWidth(2);
-    pen.setCapStyle(Qt::SquareCap);
-    painter.setPen(pen);
+//    pen.setWidth(2);
+//    pen.setCapStyle(Qt::SquareCap);
+//    painter.setPen(pen);
 
-    painter.drawLine(borderRadius, 0, width() - borderRadius, 0);
-    painter.drawLine(borderRadius, height(), width() - borderRadius, height());
-    painter.drawLine(0, borderRadius, 0, height() - borderRadius);
-    painter.drawLine(width(), borderRadius, width(), height() - borderRadius);
+//    painter.drawLine(borderRadius, 0, width() - borderRadius, 0);
+//    painter.drawLine(borderRadius, height(), width() - borderRadius, height());
+//    painter.drawLine(0, borderRadius, 0, height() - borderRadius);
+//    painter.drawLine(width(), borderRadius, width(), height() - borderRadius);
 
-    pen.setWidth(1);
-    painter.setPen(pen);
-    painter.drawArc(0, 0, borderRadius * 2, borderRadius * 2, 90 * 16, 90 * 16);
-    painter.drawArc(width() - borderRadius * 2, 0, borderRadius * 2, borderRadius * 2, 0 * 16, 90 * 16);
-    painter.drawArc(0, height() - borderRadius * 2, borderRadius * 2, borderRadius * 2, 180 * 16, 90 * 16);
-    painter.drawArc(width() - borderRadius * 2, height() - borderRadius * 2, borderRadius * 2, borderRadius * 2, 270 * 16, 90 * 16);
+//    pen.setWidth(1);
+//    painter.setPen(pen);
+//    painter.drawArc(0, 0, borderRadius * 2, borderRadius * 2, 90 * 16, 90 * 16);
+//    painter.drawArc(width() - borderRadius * 2, 0, borderRadius * 2, borderRadius * 2, 0 * 16, 90 * 16);
+//    painter.drawArc(0, height() - borderRadius * 2, borderRadius * 2, borderRadius * 2, 180 * 16, 90 * 16);
+//    painter.drawArc(width() - borderRadius * 2, height() - borderRadius * 2, borderRadius * 2, borderRadius * 2, 270 * 16, 90 * 16);
 
-    // Background border
-    QLinearGradient backGradient(width() / 2, height() / 2, width() / 2, height());
-//    backGradient.setColorAt(0, this->isEnabled() ? m_backColor : palette().color(QPalette::Button));
-//    backGradient.setColorAt(1, this->isEnabled() ? m_backColor.darker(130) : palette().color(QPalette::Button).darker(130));
+//    // Background border
+//    QLinearGradient backGradient(width() / 2, height() / 2, width() / 2, height());
+////    backGradient.setColorAt(0, this->isEnabled() ? m_backColor : palette().color(QPalette::Button));
+////    backGradient.setColorAt(1, this->isEnabled() ? m_backColor.darker(130) : palette().color(QPalette::Button).darker(130));
 
-    if (palette().color(QPalette::Button).valueF() < 0.5) {
-        backGradient.setColorAt(0, this->isEnabled() ? palette().color(QPalette::Button).lighter(170) : palette().color(QPalette::Disabled, QPalette::Button).lighter(170));
-        backGradient.setColorAt(1, this->isEnabled() ? palette().color(QPalette::Button) : palette().color(QPalette::Disabled, QPalette::Button));
-    }else {
-        backGradient.setColorAt(0, this->isEnabled() ? palette().color(QPalette::Button) : palette().color(QPalette::Disabled, QPalette::Button));
-        backGradient.setColorAt(1, this->isEnabled() ? palette().color(QPalette::Button).darker(130) : palette().color(QPalette::Disabled, QPalette::Button).darker(130));
-    }
+//    if (palette().color(QPalette::Button).valueF() < 0.5) {
+//        backGradient.setColorAt(0, this->isEnabled() ? palette().color(QPalette::Button).lighter(170) : palette().color(QPalette::Disabled, QPalette::Button).lighter(170));
+//        backGradient.setColorAt(1, this->isEnabled() ? palette().color(QPalette::Button) : palette().color(QPalette::Disabled, QPalette::Button));
+//    }else {
+//        backGradient.setColorAt(0, this->isEnabled() ? palette().color(QPalette::Button) : palette().color(QPalette::Disabled, QPalette::Button));
+//        backGradient.setColorAt(1, this->isEnabled() ? palette().color(QPalette::Button).darker(130) : palette().color(QPalette::Disabled, QPalette::Button).darker(130));
+//    }
 
-    QBrush backBrush(backGradient);
-    painter.setBrush(backBrush);
-    painter.setPen(Qt::NoPen);
-    painter.drawRoundedRect(borderWidth - 1, borderWidth - 1, width() - borderWidth * 2 + 2, height() - borderWidth * 2 + 2, 2, 2);
+//    QBrush backBrush(backGradient);
+//    painter.setBrush(backBrush);
+//    painter.setPen(Qt::NoPen);
+//    painter.drawRoundedRect(borderWidth - 1, borderWidth - 1, width() - borderWidth * 2 + 2, height() - borderWidth * 2 + 2, 2, 2);
 
     // Background
 //    painter.setBrush(this->isEnabled() ? m_backColor : palette().color(QPalette::Button));
     painter.setBrush(this->isEnabled() ? palette().color(QPalette::Button) : palette().color(QPalette::Disabled, QPalette::Button));
     painter.setPen(Qt::NoPen);
-    painter.drawRect(borderWidth, borderWidth, width() - borderWidth * 2, height() - borderWidth * 2);
+//    painter.drawRect(borderWidth, borderWidth, width() - borderWidth * 2, height() - borderWidth * 2);
+    painter.drawRoundedRect(borderWidth, borderWidth, width() + 2, height() + 2, borderRadius, borderRadius);
 
     // Icon/text rect
     QRect innerRect(borderWidth, borderWidth, width() - borderWidth * 2, height() - borderWidth * 2);
@@ -123,7 +130,8 @@ void StyledToolButton::paintEvent(QPaintEvent *e)
                            this->icon().pixmap(iconSize, this->isEnabled() ? QIcon::Normal : QIcon::Disabled));
     } else {
         // Text
-        painter.setPen(this->isEnabled() ? m_foreColor : palette().color(QPalette::Mid));
+//        painter.setPen(this->isEnabled() ? m_foreColor : palette().color(QPalette::Mid));
+        painter.setPen(this->isEnabled() ? m_foreColor : palette().color(QPalette::Disabled, QPalette::ButtonText));
         painter.drawText(innerRect, Qt::AlignCenter, this->text());
     }
 }

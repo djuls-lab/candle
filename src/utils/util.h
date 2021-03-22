@@ -85,9 +85,13 @@ public:
         button->setIcon(invertIconColors(button->icon()));
     }
 
-    static void changeButtonIconColor(QAbstractButton *button, QColor color)
+    static void changeButtonIconColor(QAbstractButton *button, QColor color, QColor disabledColor=nullptr)
     {
-        button->setIcon(changeIconColor(button->icon(), color));
+//        button->setIcon(changeIconColor(button->icon(), color));
+        QIcon icon = button->icon();
+        icon.addPixmap(changeIconColor(button->icon(), color).pixmap(icon.actualSize(QSize(64, 64))), QIcon::Normal);
+        icon.addPixmap(changeIconColor(button->icon(), disabledColor).pixmap(icon.actualSize(QSize(64, 64))), QIcon::Disabled);
+        button->setIcon(icon);
     }
 
     static QString toCamelCase(const QString& s)

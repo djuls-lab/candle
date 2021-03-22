@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Candle
+Exec=/home/djuls/candle-master/candle/candle
+Icon=/home/djuls/candle-master/src/images/candle_256.png
+Type=Application
+Comment=
+Categories=GTK;GNOME;Utility;
+X-Desktop-File-Install-Version=0.24

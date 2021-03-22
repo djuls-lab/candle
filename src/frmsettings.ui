@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>555</width>
+    <width>607</width>
     <height>715</height>
    </rect>
   </property>
@@ -71,9 +71,9 @@ QGroupBox {
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>-903</y>
-          <width>367</width>
-          <height>1569</height>
+          <y>-1070</y>
+          <width>497</width>
+          <height>1732</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -1190,24 +1190,24 @@ QGroupBox {
             <string>Panels</string>
            </property>
            <layout class="QGridLayout" name="gridLayout_3">
-            <item row="0" column="0">
-             <widget class="QCheckBox" name="chkPanelUserCommands">
-              <property name="text">
-               <string>User commands</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QCheckBox" name="chkPanelHeightmap">
-              <property name="text">
-               <string>Heightmap</string>
-              </property>
-             </widget>
-            </item>
             <item row="3" column="0">
              <widget class="QCheckBox" name="chkPanelJog">
               <property name="text">
                <string>Jog</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QCheckBox" name="chkPanelOverriding">
+              <property name="text">
+               <string>Overriding</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QCheckBox" name="chkPanelControl">
+              <property name="text">
+               <string>Control</string>
               </property>
              </widget>
             </item>
@@ -1218,10 +1218,31 @@ QGroupBox {
               </property>
              </widget>
             </item>
-            <item row="1" column="1">
-             <widget class="QCheckBox" name="chkPanelOverriding">
+            <item row="0" column="1">
+             <widget class="QCheckBox" name="chkPanelHeightmap">
               <property name="text">
-               <string>Overriding</string>
+               <string>Heightmap</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QCheckBox" name="chkPanelUserCommands">
+              <property name="text">
+               <string>User commands</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="0">
+             <widget class="QCheckBox" name="chkPanelState">
+              <property name="text">
+               <string>State</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1">
+             <widget class="QCheckBox" name="chkPanelConsole">
+              <property name="text">
+               <string>Console</string>
               </property>
              </widget>
             </item>

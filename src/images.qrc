@@ -46,5 +46,14 @@
         <file>images/home.png</file>
         <file>images/collapse_invert.png</file>
         <file>images/expand_invert.png</file>
+        <file>images/downArrow.png</file>
+        <file>images/downArrow_invert.png</file>
+        <file>images/upArrow.png</file>
+        <file>images/upArrow_invert.png</file>
+        <file>images/hidekeyboard.svg</file>
+        <file>images/enter.svg</file>
+        <file>images/backspace.svg</file>
+        <file>images/shift.svg</file>
+        <file>images/capslock.svg</file>
     </qresource>
 </RCC>

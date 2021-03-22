@@ -10,12 +10,16 @@
 #include <QStyleFactory>
 #include <QFontDatabase>
 #include <QMessageBox>
+// #include <QQmlApplicationEngine>
+// #include <QUrl>
 
 #include "parser/gcodepreprocessorutils.h"
 #include "parser/gcodeparser.h"
 #include "parser/gcodeviewparse.h"
+#include "utils/keyboard.h"
 
 #include "frmmain.h"
+
 
 int main(int argc, char *argv[])
 {
@@ -27,7 +31,17 @@ int main(int argc, char *argv[])
     }
 #endif
 
+//    QQmlApplicationEngine engine;
+//    engine.addImportPath("qrc:/keyboard/default");
+
+
+//    qputenv("QT_IM_MODULE", QByteArray("qtvirtualkeyboard")); // TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//    qputenv("QT_VIRTUALKEYBOARD_LAYOUT_PATH", "/usr/lib/aarch64-linux-gnu/qt5/qml/QtQuick/Layouts");
+//    qputenv("QT_VIRTUALKEYBOARD_STYLE", "blue");
+    qputenv("QT_IM_MODULE", QByteArray("")); // TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
     QApplication a(argc, argv);
+
 
 //    QFontDatabase::addApplicationFont(":/fonts/segoeui.ttf");
 //    QFontDatabase::addApplicationFont(":/fonts/tahoma.ttf");
@@ -71,6 +85,8 @@ int main(int argc, char *argv[])
             break;
         }
     }
+#else
+    a.setStyle(QStyleFactory::create("Fusion"));
 #endif
 
 #ifdef GLES
@@ -86,10 +102,8 @@ int main(int argc, char *argv[])
                     QMenuBar::item:pressed {border: 1px solid #505050; border-bottom: 1px; border-top-left-radius: 3px; border-top-right-radius: 3px; background: #404040; color: white;}\
                     QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white;}\
                     QDialog {border: 1px solid palette(mid);}");
+#endif
 
-#endif    
-
-    a.setStyle(QStyleFactory::create("Fusion"));
     // a.setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
 //    a.setStyleSheet(a.styleSheet() + R"(
 //    #cmdHome { qproperty-icon: url(:/images/home.png); }
@@ -118,18 +132,18 @@ int main(int argc, char *argv[])
 //    #cmdRefresh { qproperty-icon: url(:/images/reset.png); }
 //    )");
 //      a.setStyleSheet(a.styleSheet() + R"(
-//        #cboCommand QComboBox {
+//        #txtCommand QComboBox {
 //            padding-top: 3;
 //            padding-bottom: 3;
 //            padding-right: 8;
 //        }
 
-//        #cboCommand QComboBox::drop-down {
+//        #txtCommand QComboBox::drop-down {
 //            border: none;
 //            width: 0px;
 //        }
 
-//        #cboCommand QComboBox::down-arrow {
+//        #txtCommand QComboBox::down-arrow {
 //            image: none;
 //            border: none;
 //            width: 0px;
@@ -239,7 +253,12 @@ int main(int argc, char *argv[])
 //    )");
 
     frmMain w;
-    w.show();
+//    w.show();
+
+    KeyBoard keyBoard(w.centralWidget());
+//    keyBoard.hide();
+
+    w.showFullScreen(); // TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 //    qDebug() << GcodePreprocessorUtils::overrideSpeed("G0 X0 Y10 Z200 F123", 50);
 //    qDebug() << GcodePreprocessorUtils::removeComment("G1 X10 ((test comment 1))");

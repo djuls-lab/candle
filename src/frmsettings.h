@@ -94,6 +94,12 @@ public:
     void setSimplifyPrecision(double simplifyPrecision);
     bool panelUserCommands();
     void setPanelUserCommands(bool value);
+    bool panelControl();
+    void setPanelControl(bool value);
+    bool panelConsole();
+    void setPanelConsole(bool value);
+    bool panelState();
+    void setPanelState(bool value);
     bool panelHeightmap();
     void setPanelHeightmap(bool panelHeightmap);
     bool panelSpindle();

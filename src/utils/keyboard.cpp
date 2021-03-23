@@ -360,7 +360,7 @@ void KeyBoard::initWindow()
     layout->setContentsMargins(12, 12, 12, 12);
     this->setLayout(layout);
 
-    this->setStyleSheet(QString("QWidget { background-color: rgb(16, 16, 16); } QPushButton { background-color: black; } QPushButton:hover { background-color: palette(highlight); } #close { background-color: rgb(16, 16, 16); } #backspace { background-color: red; }"));
+    this->setStyleSheet(QString("QWidget { background-color: rgb(48, 48, 48); } QPushButton { background-color: black; color: white; } QPushButton:hover { background-color: palette(highlight); } #close { background-color: rgb(16, 16, 16); } #backspace { background-color: red; }"));
 }
 
 void KeyBoard::initForm()

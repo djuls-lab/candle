@@ -76,10 +76,12 @@ SOURCES += main.cpp\
     utils/keyboard.cpp \
     widgets/colorpicker.cpp \
     widgets/combobox.cpp \
+    widgets/filedialog.cpp \
     widgets/groupbox.cpp \
     widgets/lineedit.cpp \
     widgets/messagebox.cpp \
     widgets/scrollarea.cpp \
+    widgets/squarebutton.cpp \
     widgets/widget.cpp \
     widgets/glwidget.cpp \
     widgets/slider.cpp \
@@ -110,10 +112,12 @@ HEADERS  += frmmain.h \
     utils/util.h \
     widgets/colorpicker.h \
     widgets/combobox.h \
+    widgets/filedialog.h \
     widgets/groupbox.h \
     widgets/lineedit.h \
     widgets/messagebox.h \
     widgets/scrollarea.h \
+    widgets/squarebutton.h \
     widgets/widget.h \
     widgets/glwidget.h \
     widgets/slider.h \

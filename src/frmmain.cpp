@@ -34,6 +34,7 @@
 #include <QMimeData>
 #include <QStyleFactory>
 #include <QScroller>
+
 #include "frmmain.h"
 #include "ui_frmmain.h"
 #include "widgets/messagebox.h"
@@ -96,8 +97,11 @@ frmMain::frmMain(QWidget *parent) :
     ui->setupUi(this);
 
     QVBoxLayout *layout = static_cast<QVBoxLayout*>(ui->grpProgram->layout()); // TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    layout->insertWidget(0, ui->menuBar); // TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+//    layout->insertWidget(0, ui->menuBar); // TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    ui->horizontalLayout_3->insertWidget(0, ui->menuBar); // TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    ui->menuBar->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);// TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//    layout->removeItem(ui->horizontalLayout_3);
+//    layout->insertLayout(0, ui->horizontalLayout_3);
 
 #ifdef WINDOWS
     if (QSysInfo::windowsVersion() >= QSysInfo::WV_WINDOWS7) {
@@ -2513,7 +2517,7 @@ void frmMain::applyTheme()
     qApp->setStyleSheet(QString(" \
         QWidget { font-size: 12pt; font-weight: normal; } \
         QMenuBar { border: none; min-height: 48px; spacing: 9px; } \
-        QMenuBar::item { padding: 3px; padding-left: 24px; padding-right: 24px; } \
+        QMenuBar::item { background-color: palette(button); padding: 3px; padding-left: 24px; padding-right: 24px; } \
         QMenuBar::item:selected { background-color: palette(highlight); color: palette(highlighted-text); border-radius: 2px; } \
         QMenu { background-color: palette(base); } \
         QMenu::item { height: 48px; padding-left: 24px; padding-right: 24px;  margin: 3px; } \

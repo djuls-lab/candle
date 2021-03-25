@@ -55,5 +55,9 @@
         <file>images/backspace.svg</file>
         <file>images/shift.svg</file>
         <file>images/capslock.svg</file>
+        <file>images/up.svg</file>
+        <file>images/right.svg</file>
+        <file>images/left.svg</file>
+        <file>images/down.svg</file>
     </qresource>
 </RCC>

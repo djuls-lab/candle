@@ -9,6 +9,7 @@
 #include <QComboBox>
 #include <QList>
 #include <QMainWindow>
+#include <QHBoxLayout>
 
 //#define BTN_WIDTH 64
 //#define BTN_HEIGHT 64
@@ -42,23 +43,30 @@ private:
     void initWindow();
     void initForm();
     void close();
+    void toggleKeys();
 
     QWidget *currentInputWidget;
     bool isUpper;
+    bool showSigns;
     void switchCase();
 //    void focusMainWidget();
 
-    QStackedWidget *keyWindow;
-    QWidget *letterWindow;
-    QWidget *signWindow;
-    QLabel *infoLabel;
+//    QStackedWidget *keyWindow;
+//    QWidget *letterWindow;
+//    QWidget *signWindow;
+//    QLabel *infoLabel;
 
     QPushButton *closeBtn;
     QPushButton *delBtn;
-    QPushButton *typeBtn;
-    QPushButton *signalBtn;
-    QPushButton *btnSpace;
+    QPushButton *capsBtn;
+    QPushButton *signsBtn;
+    QPushButton *spaceBtn;
     QPushButton *enterBtn;
+    QPushButton *upBtn;
+    QPushButton *downBtn;
+    QPushButton *leftBtn;
+    QPushButton *rightBtn;
+    QPushButton *dotBtn;
 
     QList<QPushButton *> numericButtons;
 

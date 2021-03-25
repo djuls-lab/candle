@@ -27,11 +27,12 @@ KeyBoard::KeyBoard(QWidget *parent) :
 //    frmWidth = this->width();
 //    frmHeight = this->height();
 
-    btnWidth = (deskWidth - 12 * 12) / 11;
-    btnHeight = (deskHeight - 6 * 12)/ 2 / 5;
+    btnWidth = (deskWidth - 12 * 16) / 14;
+    btnHeight = (deskHeight - 12 * 5) / 4;
 
-    this->initWindow();
+    this->initWindow();    
     this->initForm();
+    this->toggleKeys();
     this->setVisible(false);
 }
 
@@ -116,8 +117,10 @@ void KeyBoard::focusChanged(QWidget *, QWidget *widget)
             this->setVisible(false);
             // Need to switch the input method to the original original state - lowercase
             isUpper = true;
+            showSigns = false;
             switchCase();
-            keyWindow->setCurrentIndex(0);
+            toggleKeys();
+//            keyWindow->setCurrentIndex(0);
         }
     }
 }
@@ -135,7 +138,7 @@ QPushButton* KeyBoard::createKey(QString name, QString icon, QString text, int f
     }
     button->setText(text);
     button->setFixedSize(fixedWidth == 0 ? btnWidth : fixedWidth , fixedHeight == 0 ? btnHeight : fixedHeight);
-//    button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    button->setSizePolicy(fixedWidth == 0 ? QSizePolicy::Expanding : QSizePolicy::Fixed, fixedHeight == 0 ? QSizePolicy::Expanding : QSizePolicy::Fixed);
     return button;
 }
 
@@ -170,18 +173,24 @@ void KeyBoard::slotBtnClicked()
     }
     else if (name == "caps") {
         isUpper = !isUpper;
-        keyWindow->setCurrentIndex(0);
+//        keyWindow->setCurrentIndex(0);
         switchCase();
+
+        showSigns = false;
+        toggleKeys();
     }
     else if (name == "switch") {
-        if (keyWindow->currentIndex() == 0) {
-            keyWindow->setCurrentIndex(1);
-            signalBtn->setText("ABC");
-        }
-        else {
-            keyWindow->setCurrentIndex(0);
-            signalBtn->setText("#+=");
-        }
+//        if (keyWindow->currentIndex() == 0) {
+//            keyWindow->setCurrentIndex(1);
+//            signsBtn->setText("ABC");
+//        }
+//        else {
+//            keyWindow->setCurrentIndex(0);
+//            signsBtn->setText("#+=");
+//        }
+        showSigns = !showSigns;
+        signsBtn->setText(showSigns ? "ABC" : "#+=");
+        toggleKeys();
     }
     else if (name == "backspace") {
         if (currentInputWidget != 0)
@@ -191,12 +200,52 @@ void KeyBoard::slotBtnClicked()
             qApp->postEvent(currentInputWidget, new QKeyEvent(QEvent::KeyPress, Qt::Key_Backspace, Qt::NoModifier));
         }
     }
+    else if (name == "space") {
+        if (currentInputWidget != 0)
+        {
+//               currentInputWidget->backspace();
+//               currentInputWidget->activateWindow(); // TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            qApp->postEvent(currentInputWidget, new QKeyEvent(QEvent::KeyPress, Qt::Key_Any, Qt::NoModifier, " "));
+        }
+    }
     else if (name == "enter") {
         if (currentInputWidget != 0)
         {
             qApp->postEvent(currentInputWidget, new QKeyEvent(QEvent::KeyPress, Qt::Key_Return, Qt::NoModifier));
 
             close();
+        }
+    }
+    else if (name == "left") {
+        if (currentInputWidget != 0)
+        {
+//               currentInputWidget->backspace();
+//               currentInputWidget->activateWindow(); // TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            qApp->postEvent(currentInputWidget, new QKeyEvent(QEvent::KeyPress, Qt::Key_Left, Qt::NoModifier));
+        }
+    }
+    else if (name == "right") {
+        if (currentInputWidget != 0)
+        {
+//               currentInputWidget->backspace();
+//               currentInputWidget->activateWindow(); // TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            qApp->postEvent(currentInputWidget, new QKeyEvent(QEvent::KeyPress, Qt::Key_Right, Qt::NoModifier));
+        }
+    }
+    else if (name == "up") {
+        if (currentInputWidget != 0)
+        {
+//               currentInputWidget->backspace();
+//               currentInputWidget->activateWindow(); // TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            qApp->postEvent(currentInputWidget, new QKeyEvent(QEvent::KeyPress, Qt::Key_Up, Qt::NoModifier));
+        }
+    }
+    else if (name == "down") {
+        if (currentInputWidget != 0)
+        {
+//               currentInputWidget->backspace();
+//               currentInputWidget->activateWindow(); // TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            qApp->postEvent(currentInputWidget, new QKeyEvent(QEvent::KeyPress, Qt::Key_Down, Qt::NoModifier));
         }
     }
 //    }
@@ -224,7 +273,7 @@ void KeyBoard::close(){
     this->setVisible(false);
     isUpper = true;
     switchCase();
-    keyWindow->setCurrentIndex(0);
+//    keyWindow->setCurrentIndex(0);
 }
 
 
@@ -239,11 +288,11 @@ void KeyBoard::initWindow()
     this->setAttribute(Qt::WA_X11DoNotAcceptFocus, true); // TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     this->setAttribute(Qt::WA_ShowWithoutActivating, true); // TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    keyWindow = new QStackedWidget(this);
-//    keyWindow->setFixedSize(10 * BTN_SIZE, 4 * BTN_SIZE);
-    keyWindow->setContentsMargins(0, 0, 0, 0);
-    letterWindow = new QWidget;
-    signWindow = new QWidget;
+//    keyWindow = new QStackedWidget(this);
+////    keyWindow->setFixedSize(10 * BTN_SIZE, 4 * BTN_SIZE);
+//    keyWindow->setContentsMargins(0, 0, 0, 0);
+//    letterWindow = new QWidget;
+//    signWindow = new QWidget;
 
 
     // Add function button
@@ -253,13 +302,23 @@ void KeyBoard::initWindow()
     delBtn = createKey("backspace", ":/images/backspace.svg", ""); //, 2 * (btnWidth + 12) - 12);
 
     // Change the input type: uppercase, lowercase
-    typeBtn = createKey("caps", ":/images/capslock.svg", "", 2 * (btnWidth + 12) - (12 / 2 + 1));
+    capsBtn = createKey("caps", ":/images/capslock.svg", ""); //, 2 * (btnWidth + 12) - (12 / 2 + 1));
 
     // Change character or letter input
-    signalBtn = createKey("switch", "", "#+=", 2 * (btnWidth + 12) - (12 / 2 + 1));
+    signsBtn = createKey("switch", "", "#+="); //, 2 * (btnWidth + 12) - (12 / 2 + 1));
 
     // Change character or letter input
-    enterBtn = createKey("enter", ":/images/enter.svg", "", 2 * (btnWidth + 12) - 12, 2 * (btnHeight + 12) - 12);
+    enterBtn = createKey("enter", ":/images/enter.svg", "", 1.5 * (btnWidth) + 12 / 2); //, 2 * (btnWidth + 12) - 12, 2 * (btnHeight + 12) - 12);
+
+    dotBtn = createKey("", "", ".");
+
+    upBtn = createKey("up", ":/images/up.svg", "");
+
+    downBtn = createKey("down", ":/images/down.svg", "");
+
+    leftBtn = createKey("left", ":/images/left.svg", "");
+
+    rightBtn = createKey("right", ":/images/right.svg", "");
 
 
     const QList<int> numbers = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
@@ -276,98 +335,181 @@ void KeyBoard::initWindow()
 
 
     //Space
-    btnSpace = createKey("alpha", "", " ", 7 * (btnWidth + 12) - 12);
+    spaceBtn = createKey("space", "", "Space", 9 * (btnWidth + 12) - 12);
 
-    QGridLayout *letterLayout = new QGridLayout;
+//    QGridLayout *letterLayout = new QGridLayout;
 
-    int i = 0;
-    for (int j=0; j<10; j++) {
-        letterLayout->addWidget(alphaButtons[i], 0, j, 1, 1);
-        i++;
-    }
-    for (int j=0; j<9; j++) {
-        letterLayout->addWidget(alphaButtons[i], 1, j + 1, 1, 1);
-        i++;
-    }
-    for (int j=0; j<7; j++) {
-        letterLayout->addWidget(alphaButtons[i], 2, j + 1, 1, 1);
-        i++;
-    }
+//    int i = 0;
+//    for (int j=0; j<10; j++) {
+//        letterLayout->addWidget(alphaButtons[i], 0, j, 1, 1);
+//        i++;
+//    }
+//    for (int j=0; j<9; j++) {
+//        letterLayout->addWidget(alphaButtons[i], 1, j + 1, 1, 1);
+//        i++;
+//    }
+//    for (int j=0; j<7; j++) {
+//        letterLayout->addWidget(alphaButtons[i], 2, j + 1, 1, 1);
+//        i++;
+//    }
 
-    letterLayout->addWidget(btnSpace,3,1,1,7);
-    // Set row and column spacing
-    letterLayout->setSpacing(12);
+//    letterLayout->addWidget(btnSpace,3,1,1,7);
+//    // Set row and column spacing
+//    letterLayout->setSpacing(12);
 
-    // Set and frame spacing
-    letterLayout->setContentsMargins(0, 0, 0, 0);
-    letterWindow->setLayout(letterLayout);
+//    // Set and frame spacing
+//    letterLayout->setContentsMargins(0, 0, 0, 0);
+//    letterWindow->setLayout(letterLayout);
 
 
-    const QList<QString> signs = {"!","@","#","$","%","^","&&","*","(",")",",",".","?","~","_","-","+","/","=","[","]","{","}","|","\\","'"};
+    const QList<QString> signs = {"!","@","#","$","%","^","&&","*","(",")",",",":","?","~","_","-","+","/","=","[","]","{","}","|","\\","'"};
     for (int i=0; i<signs.size(); i++ ) {
         signButtons << createKey("sign", "", signs[i]);
     }
 
-    //Space
-    btnSpace = createKey("alpha", "", " ", 7 * (btnWidth + 12) - 12);
 
-    QGridLayout *signLayout = new QGridLayout;
+//    //Space
+//    btnSpace = createKey("alpha", "", " ", 7 * (btnWidth + 12) - 12);
 
-    i = 0;
-    for (int j=0; j<10; j++) {
-        signLayout->addWidget(signButtons[i], 0, j, 1, 1);
-        i++;
-    }
-    for (int j=0; j<9; j++) {
-        signLayout->addWidget(signButtons[i], 1, j + 1, 1, 1);
-        i++;
-    }
-    for (int j=0; j<7; j++) {
-        signLayout->addWidget(signButtons[i], 2, j + 1, 1, 1);
-        i++;
-    }
+//    QGridLayout *signLayout = new QGridLayout;
+
+//    i = 0;
+//    for (int j=0; j<10; j++) {
+//        signLayout->addWidget(signButtons[i], 0, j, 1, 1);
+//        i++;
+//    }
+//    for (int j=0; j<9; j++) {
+//        signLayout->addWidget(signButtons[i], 1, j + 1, 1, 1);
+//        i++;
+//    }
+//    for (int j=0; j<7; j++) {
+//        signLayout->addWidget(signButtons[i], 2, j + 1, 1, 1);
+//        i++;
+//    }
 
 
-    signLayout->addWidget(btnSpace,3,1,1,7);
-    // Set row and column spacing
-    signLayout->setSpacing(12);
+//    signLayout->addWidget(btnSpace,3,1,1,7);
+//    // Set row and column spacing
+//    signLayout->setSpacing(12);
 
-    // Set and frame spacing
-    signLayout->setContentsMargins(0, 0, 0, 0);
-    signWindow->setLayout(signLayout);
+//    // Set and frame spacing
+//    signLayout->setContentsMargins(0, 0, 0, 0);
+//    signWindow->setLayout(signLayout);
 
-    keyWindow->addWidget(letterWindow);
-    keyWindow->addWidget(signWindow);
-    keyWindow->setCurrentIndex(0);
+//    keyWindow->addWidget(letterWindow);
+//    keyWindow->addWidget(signWindow);
+//    keyWindow->setCurrentIndex(0);
 
-    // Global layout
-    QGridLayout *layout = new QGridLayout;
+//    // Global layout
+//    QGridLayout *layout = new QGridLayout;
 
-    for (int i=0; i<numericButtons.size(); i++) {
-//        layout->addWidget(numericButtons[i],0,i+1,1, 1);
-        layout->addWidget(numericButtons[i],0,i,1, 1);
-    }
+//    for (int i=0; i<numericButtons.size(); i++) {
+////        layout->addWidget(numericButtons[i],0,i+1,1, 1);
+//        layout->addWidget(numericButtons[i],0,i,1, 1);
+//    }
 
-//    layout->addWidget(delBtn,   3,9,1,2);
-    layout->addWidget(delBtn,   0,10,1,1);
-//    layout->addWidget(closeBtn, 0,0,1,1);
-    layout->addWidget(closeBtn, 4,0,1,1);
-    layout->addWidget(typeBtn,  2,0,1,1);
-    layout->addWidget(signalBtn,3,0,1,2);
-    layout->addWidget(keyWindow,1,1,4,10);
-    layout->addWidget(enterBtn, 3,9,2,2);
+////    layout->addWidget(delBtn,   3,9,1,2);
+//    layout->addWidget(delBtn,   0,10,1,1);
+////    layout->addWidget(closeBtn, 0,0,1,1);
+//    layout->addWidget(closeBtn, 4,0,1,1);
+//    layout->addWidget(typeBtn,  2,0,1,1);
+//    layout->addWidget(signalBtn,3,0,1,2);
+//    layout->addWidget(keyWindow,1,1,4,10);
+//    layout->addWidget(enterBtn, 3,9,2,2);
+//    layout->setSpacing(12);
+//    layout->setContentsMargins(12, 12, 12, 12);
+//    this->setLayout(layout);
+
+
+    QVBoxLayout *layout = new QVBoxLayout;
     layout->setSpacing(12);
     layout->setContentsMargins(12, 12, 12, 12);
+
+    QHBoxLayout *row1 = new QHBoxLayout;
+    row1->setSpacing(12);
+    row1->setContentsMargins(0, 0, 0, 0);
+
+    QHBoxLayout *row2 = new QHBoxLayout;
+    row2->setSpacing(12);
+    row2->setContentsMargins(0, 0, 0, 0);
+
+    QHBoxLayout *row3 = new QHBoxLayout;
+    row3->setSpacing(12);
+    row3->setContentsMargins(0, 0, 0, 0);
+
+    QHBoxLayout *row4 = new QHBoxLayout;
+    row4->setSpacing(12);
+    row4->setContentsMargins(0, 0, 0, 0);
+
+
+    layout->addLayout(row1);
+    layout->addLayout(row2);
+    layout->addLayout(row3);
+    layout->addLayout(row4);
     this->setLayout(layout);
 
-    this->setStyleSheet(QString("QWidget { background-color: rgb(48, 48, 48); } QPushButton { background-color: black; color: white; } QPushButton:hover { background-color: palette(highlight); } #close { background-color: rgb(16, 16, 16); } #backspace { background-color: red; }"));
+
+    for (int i=0; i<10; i++) {
+        row1->addWidget(signButtons[i]);
+        row1->addWidget(alphaButtons[i]);
+    }
+
+    row1->addWidget(delBtn);
+    row1->addSpacing(12);
+    for (int i=0; i<3; i++) {
+        row1->addWidget(numericButtons[i]);
+    }
+
+    row2->addSpacing((btnWidth + 12) / 2);
+    for (int i=10; i<19; i++) {
+        row2->addWidget(signButtons[i]);
+        row2->addWidget(alphaButtons[i]);
+    }
+    row2->addWidget(enterBtn);
+    row2->addSpacing(12);
+    for (int i=3; i<6; i++) {
+        row2->addWidget(numericButtons[i]);
+    }
+
+    row3->addWidget(capsBtn);
+    for (int i=19; i<26; i++) {
+        row3->addWidget(signButtons[i]);
+        row3->addWidget(alphaButtons[i]);
+    }
+    row3->addWidget(leftBtn);
+    row3->addWidget(rightBtn);
+    row3->addWidget(upBtn);
+    row3->addSpacing(12);
+    for (int i=6; i<9; i++) {
+        row3->addWidget(numericButtons[i]);
+    }
+
+    row4->addWidget(signsBtn);
+    row4->addWidget(spaceBtn);
+    row4->addWidget(downBtn);
+    row4->addSpacing(12);
+    row4->addWidget(dotBtn);
+    for (int i=9; i<10; i++) {
+        row4->addWidget(numericButtons[i]);
+    }
+    row4->addWidget(closeBtn);
+
+    this->setStyleSheet(QString("QWidget { background-color: rgb(16, 16, 16); } QPushButton { background-color: black; color: white; } QPushButton:hover { background-color: palette(highlight); } #close { background-color: rgb(16, 16, 16); } #backspace { background-color: red; }"));
+}
+
+void KeyBoard::toggleKeys() {
+    for (int i=0; i<26; i++) {
+        signButtons[i]->setVisible(showSigns);
+        alphaButtons[i]->setVisible(!showSigns);
+    }
 }
 
 void KeyBoard::initForm()
 {
     currentInputWidget = 0;
     mousePressed = false;
-    isUpper = false;
+    isUpper = true;
+    showSigns = false;
     switchCase();
 
     QList<QPushButton *> btn = this->findChildren<QPushButton *>();
@@ -383,7 +525,7 @@ void KeyBoard::initForm()
 void KeyBoard::switchCase()
 {
 //    isUpper ? typeBtn->setText(tr("Lower")) : typeBtn->setText(tr("Upper"));
-    isUpper ? typeBtn->setIcon(QIcon(":/images/shift.svg")) : typeBtn->setIcon(QIcon(":/images/capslock.svg"));
+    isUpper ? capsBtn->setIcon(QIcon(":/images/capslock.svg")) : capsBtn->setIcon(QIcon(":/images/shift.svg"));
     foreach (QPushButton *button, alphaButtons) {
         isUpper ? button->setText(button->text().toUpper()) : button->setText(button->text().toLower());
     }

@@ -833,7 +833,7 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_3">
           <property name="leftMargin">
-           <number>3</number>
+           <number>0</number>
           </property>
           <property name="topMargin">
            <number>3</number>
@@ -993,7 +993,7 @@
            <property name="geometry">
             <rect>
              <x>0</x>
-             <y>-128</y>
+             <y>0</y>
              <width>488</width>
              <height>1260</height>
             </rect>

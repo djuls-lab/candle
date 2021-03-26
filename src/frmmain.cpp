@@ -96,12 +96,18 @@ frmMain::frmMain(QWidget *parent) :
 
     ui->setupUi(this);
 
-    QVBoxLayout *layout = static_cast<QVBoxLayout*>(ui->grpProgram->layout()); // TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//    QVBoxLayout *layout = static_cast<QVBoxLayout*>(ui->grpProgram->layout()); // TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //    layout->insertWidget(0, ui->menuBar); // TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     ui->horizontalLayout_3->insertWidget(0, ui->menuBar); // TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     ui->menuBar->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);// TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //    layout->removeItem(ui->horizontalLayout_3);
 //    layout->insertLayout(0, ui->horizontalLayout_3);
+//    ui->actTestMode->hide();
+//    ui->actAutoScroll->hide();
+//    ui->menuBar->findChild<QMenu *>("mnuService")->addAction("Check Mode");
+//    ui->menuBar->findChild<QMenu *>("mnuService")->addAction("Autoscroll");
+//    ui->cmdFileOpen->hide();
+    connect(ui->actTestMode, SIGNAL(toggled(bool)), this, SLOT(on_actTestMode_clicked(bool)));
 
 #ifdef WINDOWS
     if (QSysInfo::windowsVersion() >= QSysInfo::WV_WINDOWS7) {
@@ -422,7 +428,7 @@ void frmMain::loadSettings()
 
     ui->grpConsole->setMinimumHeight(set.value("consoleMinHeight", 100).toInt());
 
-    ui->chkAutoScroll->setChecked(set.value("autoScroll", false).toBool());
+    ui->actAutoScroll->setChecked(set.value("autoScroll", false).toBool());
 
     ui->slbSpindle->setRatio(100);
     ui->slbSpindle->setMinimum(m_settings->spindleSpeedMin());
@@ -458,8 +464,8 @@ void frmMain::loadSettings()
         ui->splitter->setStretchFactor(1, 1);
     } else ui->splitter->restoreState(splitterState);
 
-    ui->chkAutoScroll->setVisible(ui->splitter->sizes()[1]);
-    resizeCheckBoxes();
+    ui->actAutoScroll->setVisible(ui->splitter->sizes()[1]);
+    // resizeCheckBoxes();
 
     ui->vertSplitter->restoreState(set.value("vertSplitter", QByteArray()).toByteArray());
 
@@ -578,7 +584,7 @@ void frmMain::saveSettings()
     set.setValue("toolType", m_settings->toolType());
     set.setValue("fps", m_settings->fps());
     set.setValue("queryStateTime", m_settings->queryStateTime());
-    set.setValue("autoScroll", ui->chkAutoScroll->isChecked());
+    set.setValue("autoScroll", ui->actAutoScroll->isChecked());
     set.setValue("header", ui->tblProgram->horizontalHeader()->saveState());
     set.setValue("splitter", ui->splitter->saveState());
     set.setValue("vertSplitter", ui->vertSplitter->saveState());
@@ -701,7 +707,7 @@ void frmMain::updateControlsState() {
     ui->cmdCommandSend->setEnabled(portOpened);
 //    ui->widgetFeed->setEnabled(!m_transferringFile);
 
-    ui->chkTestMode->setEnabled(portOpened && !m_processingFile);
+    ui->actTestMode->setEnabled(portOpened && !m_processingFile);
     ui->cmdHome->setEnabled(!m_processingFile);
     ui->cmdTouch->setEnabled(!m_processingFile);
     ui->cmdZeroXY->setEnabled(!m_processingFile);
@@ -716,7 +722,7 @@ void frmMain::updateControlsState() {
     ui->cmdFileOpen->setEnabled(!m_processingFile);
     ui->cmdFileReset->setEnabled(!m_processingFile && m_programModel.rowCount() > 1);
     ui->cmdFileSend->setEnabled(portOpened && !m_processingFile && m_programModel.rowCount() > 1);
-    ui->cmdFilePause->setEnabled(m_processingFile && !ui->chkTestMode->isChecked());
+    ui->cmdFilePause->setEnabled(m_processingFile && !ui->actTestMode->isChecked());
     ui->cmdFileAbort->setEnabled(m_processingFile);
     ui->actFileOpen->setEnabled(!m_processingFile);
     ui->mnuRecent->setEnabled(!m_processingFile && ((m_recentFiles.count() > 0 && !m_heightMapMode)
@@ -775,8 +781,8 @@ void frmMain::updateControlsState() {
     ui->cboJogStep->setStyleSheet(QString("font-size: %1").arg(m_settings->fontSize()));
     ui->cboJogFeed->setStyleSheet(ui->cboJogStep->styleSheet());
 
-    ui->chkTestMode->setVisible(!m_heightMapMode);
-    ui->chkAutoScroll->setVisible(ui->splitter->sizes()[1] && !m_heightMapMode);
+    ui->actTestMode->setVisible(!m_heightMapMode);
+    ui->actAutoScroll->setVisible(ui->splitter->sizes()[1] && !m_heightMapMode);
 
     ui->tblHeightMap->setVisible(m_heightMapMode);
     ui->tblProgram->setVisible(!m_heightMapMode);
@@ -955,8 +961,8 @@ void frmMain::onSerialPortReadyRead()
                 ui->cmdSafePosition->setEnabled(status == IDLE);
                 ui->cmdZeroXY->setEnabled(status == IDLE);
                 ui->cmdZeroZ->setEnabled(status == IDLE);
-                ui->chkTestMode->setEnabled(status != RUN && !m_processingFile);
-                ui->chkTestMode->setChecked(status == CHECK);
+                ui->actTestMode->setEnabled(status != RUN && !m_processingFile);
+                ui->actTestMode->setChecked(status == CHECK);
                 ui->cmdFilePause->setChecked(status == HOLD0 || status == HOLD1 || status == QUEUE);
                 ui->cmdSpindle->setEnabled(!m_processingFile || status == HOLD0);
 #ifdef WINDOWS
@@ -1316,7 +1322,7 @@ void frmMain::onSerialPortReadyRead()
 
                             m_fileProcessedCommandIndex = ca.tableIndex;
 
-                            if (ui->chkAutoScroll->isChecked() && ca.tableIndex != -1) {
+                            if (ui->actAutoScroll->isChecked() && ca.tableIndex != -1) {
                                 ui->tblProgram->scrollTo(m_currentModel->index(ca.tableIndex + 1, 0));      // TODO: Update by timer
                                 ui->tblProgram->setCurrentIndex(m_currentModel->index(ca.tableIndex, 1));
                             }
@@ -1489,7 +1495,7 @@ void frmMain::onScroolBarAction(int action)
 {
     Q_UNUSED(action)
 
-    if (m_processingFile) ui->chkAutoScroll->setChecked(false);
+    if (m_processingFile) ui->actAutoScroll->setChecked(false);
 }
 
 void frmMain::onJogTimer()
@@ -1525,7 +1531,7 @@ void frmMain::showEvent(QShowEvent *se)
 
     ui->glwVisualizer->setUpdatesEnabled(true);
 
-    resizeCheckBoxes();
+    // resizeCheckBoxes();
 }
 
 void frmMain::hideEvent(QHideEvent *he)
@@ -1540,7 +1546,7 @@ void frmMain::resizeEvent(QResizeEvent *re)
     Q_UNUSED(re)
 
     placeVisualizerButtons();
-    resizeCheckBoxes();
+    // resizeCheckBoxes();
     resizeTableHeightMapSections();
 }
 
@@ -1553,47 +1559,47 @@ void frmMain::resizeTableHeightMapSections()
     }
 }
 
-void frmMain::resizeCheckBoxes()
-{
-    static int widthCheckMode = ui->chkTestMode->sizeHint().width();
-    static int widthAutoScroll = ui->chkAutoScroll->sizeHint().width();
+//void frmMain::resizeCheckBoxes()
+//{
+//    static int widthCheckMode = ui->actTestMode->sizeHint().width();
+//    static int widthAutoScroll = ui->actAutoScroll->sizeHint().width();
 
-    // Transform checkboxes
+//    // Transform checkboxes
 
-    this->setUpdatesEnabled(false);
+//    this->setUpdatesEnabled(false);
 
-    updateLayouts();
+//    updateLayouts();
 
-    if (ui->chkTestMode->sizeHint().width() > ui->chkTestMode->width()) {
-        widthCheckMode = ui->chkTestMode->sizeHint().width();
-        ui->chkTestMode->setText(tr("Check"));
-        ui->chkTestMode->setMinimumWidth(ui->chkTestMode->sizeHint().width());
-        updateLayouts();
-    }
+//    if (ui->actTestMode->sizeHint().width() > ui->actTestMode->width()) {
+//        widthCheckMode = ui->actTestMode->sizeHint().width();
+//        ui->actTestMode->setText(tr("Check"));
+//        ui->actTestMode->setMinimumWidth(ui->actTestMode->sizeHint().width());
+//        updateLayouts();
+//    }
 
-    if (ui->chkAutoScroll->sizeHint().width() > ui->chkAutoScroll->width()
-            && ui->chkTestMode->text() == tr("Check")) {
-        widthAutoScroll = ui->chkAutoScroll->sizeHint().width();
-        ui->chkAutoScroll->setText(tr("Scroll"));
-        ui->chkAutoScroll->setMinimumWidth(ui->chkAutoScroll->sizeHint().width());
-        updateLayouts();
-    }
+//    if (ui->actAutoScroll->sizeHint().width() > ui->actAutoScroll->width()
+//            && ui->actTestMode->text() == tr("Check")) {
+//        widthAutoScroll = ui->actAutoScroll->sizeHint().width();
+//        ui->actAutoScroll->setText(tr("Scroll"));
+//        ui->actAutoScroll->setMinimumWidth(ui->actAutoScroll->sizeHint().width());
+//        updateLayouts();
+//    }
 
-    if (ui->spacerBot->geometry().width() + ui->chkAutoScroll->sizeHint().width()
-            - ui->spacerBot->sizeHint().width() > widthAutoScroll && ui->chkAutoScroll->text() == tr("Scroll")) {
-        ui->chkAutoScroll->setText(tr("Autoscroll"));
-        updateLayouts();
-    }
+//    if (ui->spacerBot->geometry().width() + ui->actAutoScroll->sizeHint().width()
+//            - ui->spacerBot->sizeHint().width() > widthAutoScroll && ui->actAutoScroll->text() == tr("Scroll")) {
+//        ui->actAutoScroll->setText(tr("Autoscroll"));
+//        updateLayouts();
+//    }
 
-    if (ui->spacerBot->geometry().width() + ui->chkTestMode->sizeHint().width()
-            - ui->spacerBot->sizeHint().width() > widthCheckMode && ui->chkTestMode->text() == tr("Check")) {
-        ui->chkTestMode->setText(tr("Check mode"));
-        updateLayouts();
-    }
+//    if (ui->spacerBot->geometry().width() + ui->actTestMode->sizeHint().width()
+//            - ui->spacerBot->sizeHint().width() > widthCheckMode && ui->actTestMode->text() == tr("Check")) {
+//        ui->actTestMode->setText(tr("Check mode"));
+//        updateLayouts();
+//    }
 
-    this->setUpdatesEnabled(true);
-    this->repaint();
-}
+//    this->setUpdatesEnabled(true);
+//    this->repaint();
+//}
 
 void frmMain::timerEvent(QTimerEvent *te)
 {
@@ -1955,7 +1961,7 @@ void frmMain::on_cmdFileSend_clicked()
     m_storedKeyboardControl = ui->chkKeyboardControl->isChecked();
     ui->chkKeyboardControl->setChecked(false);
 
-    if (!ui->chkTestMode->isChecked()) storeOffsets(); // Allready stored on check
+    if (!ui->actTestMode->isChecked()) storeOffsets(); // Allready stored on check
     storeParserState();
 
 #ifdef WINDOWS
@@ -2063,7 +2069,7 @@ void frmMain::onActSendFromLineTriggered()
     m_storedKeyboardControl = ui->chkKeyboardControl->isChecked();
     ui->chkKeyboardControl->setChecked(false);
 
-    if (!ui->chkTestMode->isChecked()) storeOffsets(); // Allready stored on check
+    if (!ui->actTestMode->isChecked()) storeOffsets(); // Allready stored on check
     storeParserState();
 
 #ifdef WINDOWS
@@ -2087,7 +2093,7 @@ void frmMain::onActSendFromLineTriggered()
 void frmMain::on_cmdFileAbort_clicked()
 {
     m_aborting = true;
-    if (!ui->chkTestMode->isChecked()) {
+    if (!ui->actTestMode->isChecked()) {
         m_serialPort.write("!");
     } else {
         grblReset();
@@ -2745,7 +2751,7 @@ void frmMain::on_cmdSpindle_clicked(bool checked)
     }
 }
 
-void frmMain::on_chkTestMode_clicked(bool checked)
+void frmMain::on_actTestMode_clicked(bool checked)
 {
     if (checked) {
         storeOffsets();
@@ -3146,7 +3152,7 @@ bool frmMain::eventFilter(QObject *obj, QEvent *event)
             if (obj == ui->tblProgram && m_processingFile) {
                 if (keyEvent->key() == Qt::Key_PageDown || keyEvent->key() == Qt::Key_PageUp
                             || keyEvent->key() == Qt::Key_Down || keyEvent->key() == Qt::Key_Up) {
-                    ui->chkAutoScroll->setChecked(false);
+                    ui->actAutoScroll->setChecked(false);
                 }
             }
         }
@@ -3291,12 +3297,12 @@ void frmMain::on_splitter_splitterMoved(int pos, int index)
 
     if ((ui->splitter->sizes()[1] == 0) != tableCollapsed) {
         this->setUpdatesEnabled(false);
-        ui->chkAutoScroll->setVisible(ui->splitter->sizes()[1] && !m_heightMapMode);
+        ui->actAutoScroll->setVisible(ui->splitter->sizes()[1] && !m_heightMapMode);
         updateLayouts();
-        resizeCheckBoxes();
+        // resizeCheckBoxes();
 
         this->setUpdatesEnabled(true);
-        ui->chkAutoScroll->repaint();
+//        ui->actAutoScroll->repaint();
 
         // Store collapsed state
         tableCollapsed = ui->splitter->sizes()[1] == 0;

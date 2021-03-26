@@ -842,44 +842,6 @@
            <number>3</number>
           </property>
           <item>
-           <widget class="QCheckBox" name="chkTestMode">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>22</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Check mode</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="chkAutoScroll">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>22</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Autoscroll</string>
-            </property>
-           </widget>
-          </item>
-          <item>
            <spacer name="spacerBot">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -994,7 +956,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>488</width>
+             <width>548</width>
              <height>1260</height>
             </rect>
            </property>
@@ -2805,16 +2767,13 @@
     </widget>
     <addaction name="actServiceSettings"/>
     <addaction name="menuTheme"/>
-   </widget>
-   <widget class="QMenu" name="mnuHelp">
-    <property name="title">
-     <string>&amp;Help</string>
-    </property>
+    <addaction name="actTestMode"/>
+    <addaction name="actAutoScroll"/>
+    <addaction name="separator"/>
     <addaction name="actAbout"/>
    </widget>
    <addaction name="mnuFile"/>
    <addaction name="mnuService"/>
-   <addaction name="mnuHelp"/>
   </widget>
   <action name="actFileOpen">
    <property name="text">
@@ -2871,6 +2830,25 @@
     <string>Dark</string>
    </property>
   </action>
+  <action name="actTestMode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Check Mode</string>
+   </property>
+   <property name="toolTip">
+    <string>Check mode</string>
+   </property>
+  </action>
+  <action name="actAutoScroll">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Autoscroll</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -2909,8 +2887,6 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>chkTestMode</tabstop>
-  <tabstop>chkAutoScroll</tabstop>
   <tabstop>cmdFileOpen</tabstop>
   <tabstop>cmdFileReset</tabstop>
   <tabstop>cmdFileSend</tabstop>

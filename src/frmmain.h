@@ -127,7 +127,7 @@ private slots:
     void on_cmdUnlock_clicked();
     void on_cmdSafePosition_clicked();
     void on_cmdSpindle_toggled(bool checked);
-    void on_chkTestMode_clicked(bool checked);
+    void on_actTestMode_clicked(bool checked);
     void on_cmdFilePause_clicked(bool checked);
     void on_cmdFileReset_clicked();
     void on_actFileNew_triggered();
@@ -367,7 +367,7 @@ private:
 
     bool eventFilter(QObject *obj, QEvent *event);
     bool keyIsMovement(int key);
-    void resizeCheckBoxes();
+//    void resizeCheckBoxes();
     void updateLayouts();
     void updateRecentFilesMenu();
     void addRecentFile(QString fileName);

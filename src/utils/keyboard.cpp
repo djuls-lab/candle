@@ -107,6 +107,8 @@ void KeyBoard::focusChanged(QWidget *, QWidget *widget)
                 movePoint = parentWidget()->mapToGlobal(QPoint(0, deskHeight - height()));
             }
 
+//            this->setStyleSheet(parentWidget()->styleSheet());
+
             this->move(movePoint);
             this->repaint();
 //            qApp->inputMethod()->hide(); // TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -279,6 +281,7 @@ void KeyBoard::close(){
 
 void KeyBoard::initWindow()
 {
+    this->setObjectName("keyboard");
 //    this->setProperty("form", true);
 //    this->setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
 //    this->setFixedSize(11 * BTN_SIZE, 5 * BTN_SIZE);
@@ -494,7 +497,7 @@ void KeyBoard::initWindow()
     }
     row4->addWidget(closeBtn);
 
-    this->setStyleSheet(QString("QWidget { background-color: rgb(16, 16, 16); } QPushButton { background-color: black; color: white; } QPushButton:hover { background-color: palette(highlight); } #close { background-color: rgb(16, 16, 16); } #backspace { background-color: red; }"));
+    this->setStyleSheet(QString("QWidget { background-color: rgb(16, 16, 16); color: white; } QPushButton { background-color: black; color: white; min-height: 0; padding: 3px; } QPushButton:hover { background-color: palette(highlight); } #close { background-color: rgb(16, 16, 16); } #backspace { background-color: red; }"));
 }
 
 void KeyBoard::toggleKeys() {

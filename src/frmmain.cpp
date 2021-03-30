@@ -92,7 +92,7 @@ frmMain::frmMain(QWidget *parent) :
     m_settingsFileName = qApp->applicationDirPath() + "/settings.ini";
     preloadSettings();
 
-    m_settings = new frmSettings(this);    
+    m_settings = new frmSettings(this);
 
     ui->setupUi(this);
 
@@ -2523,11 +2523,12 @@ void frmMain::applyTheme()
     qApp->setStyleSheet(QString(" \
         QWidget { font-size: 12pt; font-weight: normal; } \
         QMenuBar { border: none; min-height: 48px; spacing: 9px; } \
-        QMenuBar::item { background-color: palette(button); padding: 3px; padding-left: 24px; padding-right: 24px; } \
-        QMenuBar::item:selected { background-color: palette(highlight); color: palette(highlighted-text); border-radius: 2px; } \
-        QMenu { background-color: palette(base); } \
-        QMenu::item { height: 48px; padding-left: 24px; padding-right: 24px;  margin: 3px; } \
-        QMenu::item:selected { background-color: palette(highlight); color: palette(highlighted-text); border-radius: 2px; } \
+        QMenuBar::item { background-color: palette(button); padding: 0px; padding-left: 24px; padding-right: 24px; border-radius: 0px; } \
+        QMenuBar::item:selected { background-color: palette(highlight); color: palette(highlighted-text);  } \
+        QMenu { background-color: rgb(16, 16, 16); color: white; } \
+        QMenu::item { height: 48px; padding-left: 24px; padding-right: 24px;  margin: 0px; } \
+        QMenu::item:selected { background-color: palette(highlight); color: palette(highlighted-text); border-radius: 0px; } \
+        QMenu::item:disabled { color: gray; } \
         QPushButton { border: none; border-radius: 2px; background-color: palette(button); min-height: 48px; padding: 3px; padding-left: 24px; padding-right: 24px; } \
         QPushButton:hover { background-color: palette(highlight); color: palette(highlighted-text); } \
         QPushButton:disabled { background-color: %6; color: palette(disabled); } \
@@ -2536,6 +2537,8 @@ void frmMain::applyTheme()
         QToolButton:disabled { background-color: %6; color: palette(disabled); } \
         QComboBox { border: none; border-radius: 2px; background-color: palette(button); min-height: 32px; padding: 1px 9px 1px 9px; min-width: 6em; } \
         QComboBox::drop-down { width: 24px; subcontrol-origin: padding; subcontrol-position: top right; border-top-right-radius: 3px; border-bottom-right-radius: 3px; } \
+        QComboBox QAbstractItemView { background-color: rgb(16, 16, 16); color: white; } \
+        QComboBox QAbstractItemView::item{ min-height: 48px; } \
         QComboBox::down-arrow { image: url(:/images/downArrow%7.png); } \
         QComboBox QListView::item { height: 32px; } \
         QGroupBox { border: none; padding: 3px; padding-top: 28px; } \
@@ -2560,11 +2563,17 @@ void frmMain::applyTheme()
         QSlider::handle:hover { background-color: %2; border-color: %3;} \
         QSlider::handle:disabled { background-color: %4; border-color: %5; } \
         #tblProgram QScrollBar::handle:vertical { min-width: 8px; min-height: 24px; } \
-        QMessageBox { border: none; background-color: rgba(0,0,0,192); color: palette(text); } \
+        QMessageBox { border: none; background-color: rgb(16, 16, 16); color: white; } \
     ").arg(backgroundColor.name()).arg(sliderHandleHoverColor.name()).arg(sliderHandleBorderHoverColor.name())
       .arg(sliderHandleDisabledColor.name()).arg(sliderHandleBorderDisabledColor.name()).arg(buttonDisabledColor.name())
       .arg((m_currentThemeIndex==0) ? "" : "_invert"));
 }
+
+//        #keyboard QWidget { background-color: rgb(16, 16, 16); } \
+//        #keyboard QWidget QToolButton { background-color: black; color: white; min-height: 0; padding: 3px; } \
+//        #keyboard QWidget QToolButton:hover { background-color: palette(highlight); } \
+//        #keyboard QWidget #close QToolButton { background-color: rgb(16, 16, 16); } \
+//        #keyboard QWidget #backspace QToolButton { background-color: red; } \
 
 //        QMessageBox QPushButton { border: none; border-radius: 2px; background-color: palette(button); min-height: 48px; padding: 3px; padding-left: 24px; padding-right: 24px; }\
 

@@ -127,7 +127,7 @@ private slots:
     void on_cmdUnlock_clicked();
     void on_cmdSafePosition_clicked();
     void on_cmdSpindle_toggled(bool checked);
-    void on_actTestMode_clicked(bool checked);
+    void on_actTestMode_toggled(bool checked);
     void on_cmdFilePause_clicked(bool checked);
     void on_cmdFileReset_clicked();
     void on_actFileNew_triggered();
@@ -205,7 +205,7 @@ private slots:
 
     void on_GamepadStateChanged();
 
-    void on_GamepadZeroState();
+    void on_GamepadZeroState();    
 
 protected:
     void showEvent(QShowEvent *se);

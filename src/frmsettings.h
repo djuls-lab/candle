@@ -22,7 +22,8 @@ public:
     explicit frmSettings(QWidget *parent = 0);
     ~frmSettings();
 
-    int exec();
+//    int exec();
+    void show();
     void undo();
 
     QString port();

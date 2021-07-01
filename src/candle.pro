@@ -128,6 +128,7 @@ HEADERS  += frmmain.h \
 FORMS += frmmain.ui \
     frmsettings.ui \
     frmabout.ui \
+    widgets/filedialog.ui \
     widgets/sliderbox.ui
 
 DEFINES += _USE_MATH_DEFINES

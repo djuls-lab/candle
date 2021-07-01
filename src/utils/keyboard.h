@@ -26,9 +26,10 @@ public:
     int btnHeight;
 
 protected:
-    void mouseMoveEvent(QMouseEvent *e);
-    void mousePressEvent(QMouseEvent *e);
-    void mouseReleaseEvent(QMouseEvent *);
+    void mouseMoveEvent(QMouseEvent *e) override;
+    void mousePressEvent(QMouseEvent *e) override;
+    void mouseReleaseEvent(QMouseEvent *) override;
+//    bool eventFilter(QObject *obj, QEvent *event) override;
 
 private slots:
     void focusChanged(QWidget *, QWidget *nowWidget);

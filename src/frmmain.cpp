@@ -38,6 +38,7 @@
 #include "frmmain.h"
 #include "ui_frmmain.h"
 #include "widgets/messagebox.h"
+#include "widgets/filedialog.h"
 
 frmMain::frmMain(QWidget *parent) :
     QMainWindow(parent),
@@ -99,7 +100,7 @@ frmMain::frmMain(QWidget *parent) :
 //    QVBoxLayout *layout = static_cast<QVBoxLayout*>(ui->grpProgram->layout()); // TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //    layout->insertWidget(0, ui->menuBar); // TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     ui->horizontalLayout_3->insertWidget(0, ui->menuBar); // TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    ui->menuBar->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);// TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    ui->menuBar->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);// TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //    layout->removeItem(ui->horizontalLayout_3);
 //    layout->insertLayout(0, ui->horizontalLayout_3);
 //    ui->actTestMode->hide();
@@ -107,7 +108,6 @@ frmMain::frmMain(QWidget *parent) :
 //    ui->menuBar->findChild<QMenu *>("mnuService")->addAction("Check Mode");
 //    ui->menuBar->findChild<QMenu *>("mnuService")->addAction("Autoscroll");
 //    ui->cmdFileOpen->hide();
-    connect(ui->actTestMode, SIGNAL(toggled(bool)), this, SLOT(on_actTestMode_clicked(bool)));
 
 #ifdef WINDOWS
     if (QSysInfo::windowsVersion() >= QSysInfo::WV_WINDOWS7) {
@@ -426,7 +426,7 @@ void frmMain::loadSettings()
     m_settings->setPanelOverriding(set.value("panelOverridingVisible", true).toBool());
     m_settings->setPanelJog(set.value("panelJogVisible", true).toBool());
 
-    ui->grpConsole->setMinimumHeight(set.value("consoleMinHeight", 100).toInt());
+//    ui->grpConsole->setMinimumHeight(set.value("consoleMinHeight", 100).toInt());
 
     ui->actAutoScroll->setChecked(set.value("autoScroll", false).toBool());
 
@@ -538,6 +538,10 @@ void frmMain::loadSettings()
     ui->txtCommand->addItems(set.value("recentCommands", QStringList()).toStringList());
 //    ui->txtCommand->setCurrentIndex(-1);
 
+    ui->vertSplitter->setStretchFactor(1, 0);
+    int largeWidth = QGuiApplication::primaryScreen()->size().width();
+    ui->vertSplitter->setSizes(QList<int>({largeWidth - 255, 255}));
+
     m_settingsLoading = false;
 }
 
@@ -618,7 +622,7 @@ void frmMain::saveSettings()
     set.setValue("panelOverridingVisible", m_settings->panelOverriding());
     set.setValue("panelJogVisible", m_settings->panelJog());
     set.setValue("fontSize", m_settings->fontSize());
-    set.setValue("consoleMinHeight", ui->grpConsole->minimumHeight());
+//    set.setValue("consoleMinHeight", ui->grpConsole->minimumHeight());
 
     set.setValue("feedOverride", ui->slbFeedOverride->isChecked());
     set.setValue("feedOverrideValue", ui->slbFeedOverride->value());
@@ -1538,7 +1542,7 @@ void frmMain::hideEvent(QHideEvent *he)
 {
     Q_UNUSED(he)
 
-    ui->glwVisualizer->setUpdatesEnabled(false);
+    ui->glwVisualizer->setUpdatesEnabled(false);    
 }
 
 void frmMain::resizeEvent(QResizeEvent *re)
@@ -1696,9 +1700,16 @@ void frmMain::on_actFileExit_triggered()
 
 void frmMain::on_cmdFileOpen_clicked()
 {
+//    FileDialog myDialog(qApp->activeWindow()); // TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//    myDialog.exec(); // TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
     if (!m_heightMapMode) {
         if (!saveChanges(false)) return;
 
+//        QString homeLocation = QStandardPaths::locate(QStandardPaths::DownloadLocation, QString(), QStandardPaths::LocateDirectory);
+//        QStringList filters = {"*.nc", "*.ncc", "*.ngc", "*.tap", "*.txt"};
+        FileDialog* fileDialog = FileDialog::getOpenFileDialog(this, tr("Open"), m_lastFolder, tr("G-Code files (*.nc *.ncc *.ngc *.tap *.txt);;All files (*.*)"));
 
 //        QFileDialog dialog(qApp->activeWindow(), tr("Open"), m_lastFolder, tr("G-Code files (*.nc *.ncc *.ngc *.tap *.txt);;All files (*.*)"));
 ////        dialog.setOptions(QFileDialog::DontResolveSymlinks|QFileDialog::DontUseNativeDialog|QFileDialog::DontUseSheet);
@@ -1716,27 +1727,37 @@ void frmMain::on_cmdFileOpen_clicked()
 //            fileName = dialog.selectedFiles().value(0);
 //        }
 
-        QString fileName = QFileDialog::getOpenFileName(this, tr("Open"), m_lastFolder,
-                                           tr("G-Code files (*.nc *.ncc *.ngc *.tap *.txt);;All files (*.*)"));
+//        QString fileName = QFileDialog::getOpenFileName(this, tr("Open"), m_lastFolder,
+//                                           tr("G-Code files (*.nc *.ncc *.ngc *.tap *.txt);;All files (*.*)"));
+        fileDialog->show();
+        connect(fileDialog, &FileDialog::finished, [this, fileDialog]() {
+            QString fileName = fileDialog->getOpenFileName();
+            if (!fileName.isEmpty()) m_lastFolder = fileName.left(fileName.lastIndexOf(QRegExp("[/\\\\]+")));
 
-        if (!fileName.isEmpty()) m_lastFolder = fileName.left(fileName.lastIndexOf(QRegExp("[/\\\\]+")));
+            if (fileName != "") {
+                addRecentFile(fileName);
+                updateRecentFilesMenu();
 
-        if (fileName != "") {
-            addRecentFile(fileName);
-            updateRecentFilesMenu();
+                loadFile(fileName);
+            }
+            delete fileDialog;
+        });
 
-            loadFile(fileName);
-        }
     } else {
         if (!saveChanges(true)) return;
 
-        QString fileName = QFileDialog::getOpenFileName(this, tr("Open"), m_lastFolder, tr("Heightmap files (*.map)"));
-
-        if (fileName != "") {
-            addRecentHeightmap(fileName);
-            updateRecentFilesMenu();
-            loadHeightMap(fileName);
-        }
+//        QString fileName = QFileDialog::getOpenFileName(this, tr("Open"), m_lastFolder, tr("Heightmap files (*.map)"));
+        FileDialog* fileDialog = FileDialog::getOpenFileDialog(this, tr("Open"), m_lastFolder, tr("Heightmap files (*.map)"));
+        fileDialog->show();
+        connect(fileDialog, &QDialog::finished, [this, fileDialog]() {
+            QString fileName = fileDialog->getOpenFileName();
+            if (fileName != "") {
+                addRecentHeightmap(fileName);
+                updateRecentFilesMenu();
+                loadHeightMap(fileName);
+            }
+            delete fileDialog;
+        });
     }
 }
 
@@ -2268,23 +2289,31 @@ void frmMain::onTableDeleteLines()
 
 void frmMain::on_actServiceSettings_triggered()
 {
-    if (m_settings->exec()) {
-        qDebug() << "Applying settings";
-        qDebug() << "Port:" << m_settings->port() << "Baud:" << m_settings->baud();
+    m_settings->setModal(false);
+    m_settings->show();
 
-        if (m_settings->port() != "" && (m_settings->port() != m_serialPort.portName() ||
-                                           m_settings->baud() != m_serialPort.baudRate())) {
-            if (m_serialPort.isOpen()) m_serialPort.close();
-            m_serialPort.setPortName(m_settings->port());
-            m_serialPort.setBaudRate(m_settings->baud());
-            openPort();
+    connect(m_settings, &QDialog::finished, [this]() {
+
+//        if (m_settings->exec()) {
+        if (m_settings->result()) {
+            qDebug() << "Applying settings";
+            qDebug() << "Port:" << m_settings->port() << "Baud:" << m_settings->baud();
+
+            if (m_settings->port() != "" && (m_settings->port() != m_serialPort.portName() ||
+                                               m_settings->baud() != m_serialPort.baudRate())) {
+                if (m_serialPort.isOpen()) m_serialPort.close();
+                m_serialPort.setPortName(m_settings->port());
+                m_serialPort.setBaudRate(m_settings->baud());
+                openPort();
+            }
+
+            updateControlsState();
+            applySettings();
+        } else {
+            qDebug() << "No settings applied";
+            m_settings->undo();
         }
-
-        updateControlsState();
-        applySettings();
-    } else {
-        m_settings->undo();
-    }
+    });
 }
 
 bool buttonLessThan(QToolButton *b1, QToolButton *b2)
@@ -2523,16 +2552,16 @@ void frmMain::applyTheme()
     qApp->setStyleSheet(QString(" \
         QWidget { font-size: 12pt; font-weight: normal; } \
         QMenuBar { border: none; min-height: 48px; spacing: 9px; } \
-        QMenuBar::item { background-color: palette(button); padding: 0px; padding-left: 24px; padding-right: 24px; border-radius: 0px; } \
+        QMenuBar::item { background-color: palette(button); padding: 0px; padding-left: 16px; padding-right: 16px; border-radius: 0px; } \
         QMenuBar::item:selected { background-color: palette(highlight); color: palette(highlighted-text);  } \
         QMenu { background-color: rgb(16, 16, 16); color: white; } \
         QMenu::item { height: 48px; padding-left: 24px; padding-right: 24px;  margin: 0px; } \
         QMenu::item:selected { background-color: palette(highlight); color: palette(highlighted-text); border-radius: 0px; } \
         QMenu::item:disabled { color: gray; } \
-        QPushButton { border: none; border-radius: 2px; background-color: palette(button); min-height: 48px; padding: 3px; padding-left: 24px; padding-right: 24px; } \
+        QPushButton { border: none; border-radius: 2px; background-color: palette(button); min-height: 48px; padding: 3px; padding-left: 16px; padding-right: 16px; } \
         QPushButton:hover { background-color: palette(highlight); color: palette(highlighted-text); } \
         QPushButton:disabled { background-color: %6; color: palette(disabled); } \
-        QToolButton { border: none; border-radius: 2px; background-color: palette(button); min-height: 48px; padding: 3px; padding-left: 24px; padding-right: 24px; } \
+        QToolButton { border: none; border-radius: 2px; background-color: palette(button); min-height: 48px; padding: 3px; padding-left: 16px; padding-right: 16px; } \
         QToolButton:hover { background-color: palette(highlight); color: palette(highlighted-text); } \
         QToolButton:disabled { background-color: %6; color: palette(disabled); } \
         QComboBox { border: none; border-radius: 2px; background-color: palette(button); min-height: 32px; padding: 1px 9px 1px 9px; min-width: 6em; } \
@@ -2550,6 +2579,10 @@ void frmMain::applyTheme()
         QScrollBar::handle:vertical { background: darkgray; } \
         QScrollBar::add-line:vertical { border: none; background: none; height: 0px; } \
         QScrollBar::sub-line:vertical { border: none; background: none; height: 0px; } \
+        QScrollBar:horizontal { border: none; height: 2px; padding-left: 8px; } \
+        QScrollBar::handle:horizontal { background: darkgray; } \
+        QScrollBar::add-line:horizontal { border: none; background: none; width: 0px; } \
+        QScrollBar::sub-line:horizontal { border: none; background: none; width: 0px; } \
         #grpJog QToolButton { min-width: 48px; min-height: 48px; padding: 0px; margin: 0px; } \
         #grpControl QToolButton { min-width: 48px; min-height: 48px; padding: 0px; margin: 0px; } \
         #grpUserCommands QToolButton { min-width: 48px; min-height: 48px; padding: 0px; margin: 0px; } \
@@ -2564,6 +2597,8 @@ void frmMain::applyTheme()
         QSlider::handle:disabled { background-color: %4; border-color: %5; } \
         #tblProgram QScrollBar::handle:vertical { min-width: 8px; min-height: 24px; } \
         QMessageBox { border: none; background-color: rgb(16, 16, 16); color: white; } \
+        QTreeView, QListView, QToolBar, QTableView { selection-background-color: transparent; show-decoration-selected: 0; outline: 0; } \
+        QTreeView::item:selected, QListView::item:selected, QToolBar::item:selected, QTableView::item:selected { background-color: palette(highlight); } \
     ").arg(backgroundColor.name()).arg(sliderHandleHoverColor.name()).arg(sliderHandleBorderHoverColor.name())
       .arg(sliderHandleDisabledColor.name()).arg(sliderHandleBorderDisabledColor.name()).arg(buttonDisabledColor.name())
       .arg((m_currentThemeIndex==0) ? "" : "_invert"));
@@ -2760,7 +2795,7 @@ void frmMain::on_cmdSpindle_clicked(bool checked)
     }
 }
 
-void frmMain::on_actTestMode_clicked(bool checked)
+void frmMain::on_actTestMode_toggled(bool checked)
 {
     if (checked) {
         storeOffsets();
@@ -2920,40 +2955,53 @@ bool frmMain::saveProgramToFile(QString fileName, GCodeTableModel *model)
 
 void frmMain::on_actFileSaveTransformedAs_triggered()
 {
-    QString fileName = (QFileDialog::getSaveFileName(this, tr("Save file as"), m_lastFolder, tr("G-Code files (*.nc *.ncc *.ngc *.tap *.txt)")));
-
-    if (!fileName.isEmpty()) {
-        saveProgramToFile(fileName, &m_programHeightmapModel);
-    }
+    FileDialog* fileDialog = (FileDialog::getSaveFileDialog(this, tr("Save file as"), m_lastFolder, tr("G-Code files (*.nc *.ncc *.ngc *.tap *.txt)")));
+    fileDialog->show();
+    connect(fileDialog, &QDialog::finished, [this, fileDialog]() {
+        QString fileName = fileDialog->getSaveFileName();
+        if (!fileName.isEmpty()) {
+            saveProgramToFile(fileName, &m_programHeightmapModel);
+        }
+        delete fileDialog;
+    });
 }
 
 void frmMain::on_actFileSaveAs_triggered()
 {
     if (!m_heightMapMode) {
-        QString fileName = (QFileDialog::getSaveFileName(this, tr("Save file as"), m_lastFolder, tr("G-Code files (*.nc *.ncc *.ngc *.tap *.txt)")));
+        FileDialog* fileDialog = (FileDialog::getSaveFileDialog(this, tr("Save file as"), m_lastFolder, tr("G-Code files (*.nc *.ncc *.ngc *.tap *.txt)")));
+        fileDialog->show();
+        connect(fileDialog, &QDialog::finished, [this, fileDialog]() {
+            QString fileName = fileDialog->getSaveFileName();
+            qDebug() << "filename: " << fileName;
+            if (!fileName.isEmpty()) if (saveProgramToFile(fileName, &m_programModel)) {
+                m_programFileName = fileName;
+                m_fileChanged = false;
 
-        if (!fileName.isEmpty()) if (saveProgramToFile(fileName, &m_programModel)) {
-            m_programFileName = fileName;
-            m_fileChanged = false;
+                addRecentFile(fileName);
+                updateRecentFilesMenu();
 
-            addRecentFile(fileName);
-            updateRecentFilesMenu();
-
-            updateControlsState();
-        }
+                updateControlsState();
+            }
+            delete fileDialog;
+        });
     } else {
-        QString fileName = (QFileDialog::getSaveFileName(this, tr("Save file as"), m_lastFolder, tr("Heightmap files (*.map)")));
+        FileDialog* fileDialog = (FileDialog::getSaveFileDialog(this, tr("Save file as"), m_lastFolder, tr("Heightmap files (*.map)")));
+        fileDialog->show();
+        connect(fileDialog, &QDialog::finished, [this, fileDialog]() {
+            QString fileName = fileDialog->getSaveFileName();
+            if (!fileName.isEmpty()) if (saveHeightMap(fileName)) {
+                ui->txtHeightMap->setText(fileName.mid(fileName.lastIndexOf("/") + 1));
+                m_heightMapFileName = fileName;
+                m_heightMapChanged = false;
 
-        if (!fileName.isEmpty()) if (saveHeightMap(fileName)) {
-            ui->txtHeightMap->setText(fileName.mid(fileName.lastIndexOf("/") + 1));
-            m_heightMapFileName = fileName;
-            m_heightMapChanged = false;
+                addRecentHeightmap(fileName);
+                updateRecentFilesMenu();
 
-            addRecentHeightmap(fileName);
-            updateRecentFilesMenu();
-
-            updateControlsState();
-        }
+                updateControlsState();
+                delete fileDialog;
+            }
+        });
     }
 }
 
@@ -4405,5 +4453,3 @@ void frmMain::on_GamepadZeroState()
         jogStep();
     }
 }
-
-

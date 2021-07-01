@@ -253,11 +253,11 @@ int main(int argc, char *argv[])
 //    )");
 
     frmMain w;
-//    w.show();
 
     KeyBoard keyBoard(w.centralWidget());
 //    keyBoard.hide();
 
+    // w.show();
     w.showFullScreen(); // TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 //    qDebug() << GcodePreprocessorUtils::overrideSpeed("G0 X0 Y10 Z200 F123", 50);

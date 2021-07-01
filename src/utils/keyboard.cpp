@@ -1,5 +1,6 @@
 #include <QDesktopWidget>
 #include <QApplication>
+#include <QRect>
 #include <QStackedWidget>
 #include <QMouseEvent>
 #include <QLabel>
@@ -17,6 +18,8 @@
 
 #include "keyboard.h"
 
+//KeyBoard::KeyBoard(QWidget *parent) :
+//    QWidget(parent)
 KeyBoard::KeyBoard(QWidget *parent) :
     QWidget(parent)
 {
@@ -34,11 +37,46 @@ KeyBoard::KeyBoard(QWidget *parent) :
     this->initForm();
     this->toggleKeys();
     this->setVisible(false);
+
+//    qApp->installEventFilter(this);
+//    this->parentWidget()->installEventFilter(this);
 }
 
 KeyBoard::~KeyBoard()
 {
 }
+
+//bool KeyBoard::eventFilter(QObject *obj, QEvent *event)
+//{
+////    bool returnEvent = true;
+////    if (obj == this) {
+//    qDebug() << "Keyboard received an event:" << event;
+//////        if (event->type() == QEvent::WindowBlocked) {
+//////            returnEvent = false;
+//////            return false;
+//////        }
+////    }
+////    if (obj == this && event->type() == QMouseEvent::MouseButtonPress) {
+//    if (event->type() == QMouseEvent::MouseButtonPress) {
+//        QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+//        qDebug() << "Mouse click pos:" << mouseEvent->pos();
+////        QRect r = this->geometry();
+//////        QRect globalRect(mapToGlobal(r.topLeft()), r.size());
+////        if (this->isVisible() && r.contains(mouseEvent->globalPos())) {
+////            qDebug() << "CLicked on keyboard !";
+////        }
+//    }
+////        return true;
+////    } else {
+////        // standard event processing
+////        return QObject::eventFilter(obj, event);
+////    }
+////    if (!returnEvent) {
+////        return QObject::eventFilter(obj, event);
+////    }
+////    return false;
+//    return QObject::eventFilter(obj, event);
+//}
 
 void KeyBoard::mouseMoveEvent(QMouseEvent *e)
 {
@@ -80,6 +118,11 @@ void KeyBoard::focusChanged(QWidget *, QWidget *widget)
             if (comboBox->isEditable())
                 currentInputWidget = comboBox;
         }
+        else if (widget->inherits("QSpinBox")) {
+            QSpinBox *spinBox = (QSpinBox*)widget;
+            if (!spinBox->isReadOnly())
+                currentInputWidget = spinBox;
+        }
         else if (widget->inherits("QDoubleSpinBox")) {
             QDoubleSpinBox *doubleSpinBox = (QDoubleSpinBox*)widget;
             if (!doubleSpinBox->isReadOnly())
@@ -112,6 +155,9 @@ void KeyBoard::focusChanged(QWidget *, QWidget *widget)
             this->move(movePoint);
             this->repaint();
 //            qApp->inputMethod()->hide(); // TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+//            parentWidget()->grabMouse();
+//            this->setWindowFlags(Qt::Tool | Qt::Dialog /*| Qt::FramelessWindowHint*/ | Qt::WindowStaysOnTopHint);
             this->setVisible(true);
         }
         else {
@@ -141,6 +187,9 @@ QPushButton* KeyBoard::createKey(QString name, QString icon, QString text, int f
     button->setText(text);
     button->setFixedSize(fixedWidth == 0 ? btnWidth : fixedWidth , fixedHeight == 0 ? btnHeight : fixedHeight);
     button->setSizePolicy(fixedWidth == 0 ? QSizePolicy::Expanding : QSizePolicy::Fixed, fixedHeight == 0 ? QSizePolicy::Expanding : QSizePolicy::Fixed);
+
+//    button->installEventFilter(this);
+
     return button;
 }
 
@@ -286,6 +335,7 @@ void KeyBoard::initWindow()
 //    this->setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
 //    this->setFixedSize(11 * BTN_SIZE, 5 * BTN_SIZE);
     this->setWindowFlags(Qt::Dialog | Qt::WindowStaysOnTopHint | Qt::X11BypassWindowManagerHint | Qt::FramelessWindowHint);
+//    this->setWindowFlags(Qt::WindowDoesNotAcceptFocus | Qt::Tool | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
     this->setFixedSize(deskWidth, deskHeight / 2);
     this->setFocusPolicy(Qt::NoFocus);
     this->setAttribute(Qt::WA_X11DoNotAcceptFocus, true); // TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

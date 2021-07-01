@@ -13,7 +13,7 @@ frmSettings::frmSettings(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::frmSettings)
 {
-    ui->setupUi(this);    
+    ui->setupUi(this);
 
     this->setLocale(QLocale::C);
     m_intValidator.setBottom(1);
@@ -37,7 +37,8 @@ frmSettings::~frmSettings()
     delete ui;
 }
 
-int frmSettings::exec()
+//int frmSettings::exec()
+void frmSettings::show()
 {
     // Store settings to undo
     m_storedValues.clear();
@@ -70,7 +71,9 @@ int frmSettings::exec()
     QColor buttonTextColor = palette().color(QPalette::ButtonText);
     Util::changeButtonIconColor(ui->cmdRefresh, buttonTextColor);
 
-    return QDialog::exec();
+    QDialog::show();
+
+//    return QDialog::exec();
 }
 
 void frmSettings::undo()
